@@ -1,0 +1,28 @@
+﻿<Window x:Class="Yatzzy.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Yatzzy"
+        mc:Ignorable="d"
+        Title=" -- The amazing Yatzy game -- " Height="700" Width="1000">
+    <Grid>
+        <TabControl>
+            <TabItem Header="New Game">
+                <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+            <TabItem Header="Scoreboard">
+                <Grid Background="#FFE5E5E5">
+                    <DataGrid HorizontalAlignment="Left" Height="531" Margin="438,103,0,0" VerticalAlignment="Top" Width="532">
+                        <DataGrid.LayoutTransform>
+                            <TransformGroup>
+                                <RotateTransform Angle="-90"/>
+                            </TransformGroup>
+                        </DataGrid.LayoutTransform>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+    </Grid>
+</Window>
