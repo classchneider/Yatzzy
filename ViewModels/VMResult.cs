@@ -4,9 +4,9 @@ namespace ViewModels
 {
     public class VMResult
     {
-        Result result;
+        Scoreboard result;
 
-        public VMResult(Result res)
+        public VMResult(Scoreboard res)
         {
             result = res;
         }
@@ -20,14 +20,14 @@ namespace ViewModels
         }
         public int sixes
         {
-            get { return result.sixes; }
+            get { return result.Sixes; }
         }
         
-        public int fives { get { return result.fives; } }
-        public int fours { get { return result.fours; } }
-        public int threes { get { return result.threes; } }
-        public int twos { get { return result.twos; } }
-        public int ones { get { return result.ones; } }
+        public int fives { get { return result.Fives; } }
+        public int fours { get { return result.Fours; } }
+        public int threes { get { return result.Threes; } }
+        public int twos { get { return result.Twos; } }
+        public int ones { get { return result.Ones; } }
 
         int Sum
         {

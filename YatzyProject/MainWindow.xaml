@@ -13,16 +13,59 @@
             </TabItem>
             <TabItem Header="Scoreboard">
                 <Grid Background="#FFE5E5E5">
-                    <DataGrid HorizontalAlignment="Left" Height="531" Margin="438,103,0,0" VerticalAlignment="Top" Width="532">
+                    <DataGrid ItemsSource="{Binding Model.PlayerList}" FlowDirection="RightToLeft" IsReadOnly="True" HorizontalAlignment="Right" VerticalAlignment="Top" AutoGenerateColumns="False" MinHeight="231" Margin="40,40,40,40" MinWidth="532">
+                        <DataGrid.ColumnHeaderStyle>
+                            <Style TargetType="{x:Type DataGridColumnHeader}">
+                                <Setter Property="LayoutTransform">
+                                    <Setter.Value>
+                                        <TransformGroup>
+                                            <RotateTransform Angle="-90"/>
+                                        </TransformGroup>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </DataGrid.ColumnHeaderStyle>
+                        <DataGrid.CellStyle>
+                            <Style TargetType="DataGridCell">
+                                <Setter Property="LayoutTransform">
+                                    <Setter.Value>
+                                        <TransformGroup>
+                                            <RotateTransform Angle="-90"/>
+                                        </TransformGroup>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </DataGrid.CellStyle>
                         <DataGrid.LayoutTransform>
                             <TransformGroup>
                                 <RotateTransform Angle="-90"/>
                             </TransformGroup>
                         </DataGrid.LayoutTransform>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Navn" Binding="{Binding Name}"/>
+                            <DataGridTextColumn Header="1ere" Binding="{Binding Result.Ones}" />
+                            <DataGridTextColumn Header="2ere" Binding="{Binding Result.Twos}" />
+                            <DataGridTextColumn Header="3ere" Binding="{Binding Result.Threes}" />
+                            <DataGridTextColumn Header="4ere" Binding="{Binding Result.Fours}" />
+                            <DataGridTextColumn Header="5ere" Binding="{Binding Result.Fives}" />
+                            <DataGridTextColumn Header="6ere" Binding="{Binding Result.Sixes}" />
+                            <DataGridTextColumn Header="Sum" Binding="{Binding Result.Sum}" />
+                            <DataGridTextColumn Header="Bonus" Binding="{Binding Result.Bonus}" />
+                            <DataGridTextColumn Header="1 par" Binding="{Binding Result.Pair}" >
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="2 par" Binding="{Binding Result.TwoPairs}" />
+                            <DataGridTextColumn Header="3ens" Binding="{Binding Result.ThreeSame}" />
+                            <DataGridTextColumn Header="4ens" Binding="{Binding Result.FourSame}" />
+                            <DataGridTextColumn Header="Lille straight" Binding="{Binding Result.LittleStraight}" />
+                            <DataGridTextColumn Header="Stor straight" Binding="{Binding Result.GreatStraight}" />
+                            <DataGridTextColumn Header="Hus" Binding="{Binding Result.House}" />
+                            <DataGridTextColumn Header="Chance" Binding="{Binding Result.Chance}" />
+                            <DataGridTextColumn Header="Yatzy" Binding="{Binding Result.Yatzy}" />
+                            <DataGridTextColumn Header="Sum" Binding="{Binding Result.Sum2}" />
+                        </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
             </TabItem>
         </TabControl>
-
     </Grid>
 </Window>

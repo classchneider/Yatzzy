@@ -1,13 +1,27 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Collections.ObjectModel;
 
 namespace YatzyRepository
 {
     public class Model : DbContext
     {
-        public DbSet<Player> Player { get; set; }
+        public DbSet<Player> Players { get; set; }
+        public DbSet<Scoreboard> Scoreboards { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
             options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=EF_Yatzy; Trusted_Connection = True; ");
+        }
+
+        public ObservableCollection<Player> PlayerList
+        {
+            get
+            {
+                if (Players.Count() == 0)
+                {
+                    Players.Load();
+                }
+                return Players.Local.ToObservableCollection();
+            }
         }
     }
 
@@ -15,16 +29,42 @@ namespace YatzyRepository
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public Scoreboard Result { get; set; }
     }
 
-    public class Result
+    public class Scoreboard
     {
         public int Id { get; set; }
-        public int sixes { get; set; }
-        public int fives { get; set; }
-        public int fours { get; set; }
-        public int threes { get; set; }
-        public int twos { get; set; }
-        public int ones { get; set; }
+        public int Sixes { get; set; }
+        public int Fives { get; set; }
+        public int Fours { get; set; }
+        public int Threes { get; set; }
+        public int Twos { get; set; }
+        public int Ones { get; set; }
+        public int Sum
+        {
+            get
+            {
+                return Sixes+Fives+Fours+Threes+Twos+Ones;
+            }
+        }
+        public int Bonus
+        {
+            get
+            {
+                return Sum > 3*(1+2+3+4+5+6) ? 50 : 0;
+            }
+        }
+
+        public int Pair { get; set; }
+        public int TwoPairs { get; set; }
+        public int ThreeSame { get; set; }
+        public int FourSame { get; set; }
+        public int LittleStraight { get; set; }
+        public int GreatStraight { get; set; }
+        public int House { get; set; }
+        public int Chance { get; set; }
+        public int Yatzy { get; set; }
+        public int Sum2 { get; set; }
     }
 }
