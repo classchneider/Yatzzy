@@ -12,74 +12,32 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ViewModels;
+using Yatzy.UserControls;
 using YatzyRepository;
 
-namespace Yatzzy
+namespace Yatzy
 {
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
-        public Model Model { get; set; } = new Model();
+        UCScoreBoard scoreboard;
+        USetupGame turnPlay;
+
+        public VMYatzyGeneral ViewModel { get; set; }
         public MainWindow()
         {
             InitializeComponent();
-            DemoVersion();
-            DataContext = this;
+            ViewModel = DataContext as VMYatzyGeneral;
+            //DataContext = this;
+            scoreboard = new UCScoreBoard(g_Right);
+            turnPlay = new USetupGame(ViewModel, g_Left);
+            g_Right.Children.Add(scoreboard);
+            g_Left.Children.Add(turnPlay);
         }
 
-        public void DemoVersion()
-        {
-
-            Scoreboard result = new Scoreboard()
-            {
-                Sixes = 18,
-                Fives = 15,
-                Fours = 12,
-                Threes = 9,
-                Twos = 6,
-                Ones = 3,
-            };
-            Model.Scoreboards.Add(result);
-            Player player = new Player()
-            {
-                Result = result,
-                Name = "Claus",
-            };
-            Model.Players.Add(player);
-            result = new Scoreboard()
-            {
-                Sixes = 18,
-                Fives = 20,
-                Fours = 8,
-                Threes = 6,
-                Twos = 6,
-                Ones = 3,
-            };
-            Model.Scoreboards.Add(result);
-            player = new Player()
-            {
-                Result = result,
-                Name = "Grisling",
-            };
-            Model.Players.Add(player);
-            result = new Scoreboard()
-            {
-                Sixes = 18,
-                Fives = 20,
-                Fours = 12,
-                Threes = 12,
-                Twos = 6,
-                Ones = 3,
-            };
-            Model.Scoreboards.Add(result);
-            player = new Player()
-            {
-                Result = result,
-                Name = "Ninka",
-            };
-            Model.Players.Add(player);
-        }
     }
 }

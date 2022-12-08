@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Yatzy", "Yatzy.csproj", "{A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YatzyRepository", "..\YatzyRepository\YatzyRepository.csproj", "{4C58F4C7-743F-4A13-86CA-D8FA9DFE9108}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ViewModels", "..\ViewModels\ViewModels.csproj", "{70A45A58-ACE2-4013-8BDA-0AAF84D7AEEA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ViewModels", "..\ViewModels\ViewModels.csproj", "{70A45A58-ACE2-4013-8BDA-0AAF84D7AEEA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9C67659F-EADE-46C6-940E-AD38500AEADC}"
 	ProjectSection(SolutionItems) = preProject
