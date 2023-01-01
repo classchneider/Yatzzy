@@ -5,12 +5,28 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Yatzy.UserControls"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="800" d:DesignWidth="600">
     <Grid>
-        <Button x:Name="DemoButton" Content="Demo" HorizontalAlignment="Left" Margin="120,95,0,0" VerticalAlignment="Top" Click="DemoButton_Click"/>
-        <TextBox x:Name="tb_Name" HorizontalAlignment="Left" Margin="10,61,0,0" TextWrapping="Wrap" VerticalAlignment=" Top" Width="120"/>
-        <Label Content="PlayerName" HorizontalAlignment="Left" Margin="10,44,0,0" VerticalAlignment="Top"/>
-        <Button x:Name="btn_AddPlayer" Content="Add" HorizontalAlignment="Left" Margin="174,95,0,0" VerticalAlignment="Top" Click="btn_AddPlayer_Click"/>
-        <ListBox x:Name="lb_Players" DisplayMemberPath="Name" ItemsSource="{Binding Players}" HorizontalAlignment="Left" Height="212" Margin="47,157,0,0" VerticalAlignment="Top" Width="190"/>
+        <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Right">
+                <Label FontSize="22" Margin="20,20,0,0" Content="Game" HorizontalAlignment="Left" Width="80"/>
+                <StackPanel Orientation="Horizontal" Margin="20, 0" Height="40">
+                    <TextBox Text="new game" Margin="0,5,5,0" FontSize="22" x:Name="tb_Game" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" GotFocus="tb_Game_GotFocus" />
+                    <Button x:Name="btn_CreateGame" Content="Add" FontSize="22" HorizontalAlignment="Right" Margin="5" VerticalAlignment="Top" Click="btn_CreateGame_Click"/>
+                </StackPanel>
+                <ListBox FontSize="22" Margin="20,10,0,0" x:Name="lb_Games" DisplayMemberPath="Name" ItemsSource="{Binding Games}" HorizontalAlignment="Left" Height="212" VerticalAlignment="Top" Width="180" SelectionChanged="lb_Games_SelectionChanged"/>
+                <Label FontSize="22" Margin="20,20,0,0" Content="PlayerName" HorizontalAlignment="Left" Width="130"/>
+                <StackPanel Orientation="Horizontal" Margin="20, 0" Height="40">
+                    <TextBox Margin="0,5,5,0" FontSize="22" x:Name="tb_Name" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" />
+                    <Button x:Name="btn_AddPlayer" Content="Add" FontSize="22" HorizontalAlignment="Right" Margin="5" VerticalAlignment="Top" Click="btn_AddPlayer_Click"/>
+                </StackPanel>
+                <ListBox FontSize="22" Margin="20,10,0,0" x:Name="lb_Players" DisplayMemberPath="VMPlayer.Name" ItemsSource="{Binding CurrentGame.PlayerScores}" HorizontalAlignment="Left" Height="212" VerticalAlignment="Top" Width="180"/>
+                <StackPanel Orientation="Horizontal" Margin="10" HorizontalAlignment="Right">
+                    <Button Margin="10" x:Name="DemoButton" Content="Demo" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="22" Click="DemoButton_Click"/>
+                    <Button Margin="10" x:Name="btn_Play" FontSize="22" Content="Play Yatzy" HorizontalAlignment="Left" VerticalAlignment="Top" Click="btn_Play_Click"/>
+                </StackPanel>
+            </StackPanel>
+            <ListBox FontSize="22" x:Name="lb_AllPlayers" DisplayMemberPath="Name" ItemsSource="{Binding Players}" Height="412" Width="180" SelectionChanged="lb_AllPlayers_SelectionChanged" SelectionMode="Multiple"/>
+        </StackPanel>
     </Grid>
 </UserControl>

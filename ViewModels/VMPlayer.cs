@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,22 +8,42 @@ using YatzyRepository;
 
 namespace ViewModels
 {
-    public class VMPlayer
+    public class VMPlayer : INotifyPropertyChanged
     {
-        Player player;
+        private Player Player { get; set; }
 
         public VMPlayer(Player player)
         {
-            this.player = player;
+            this.Player = player;
         }
 
-        public string Name 
+        public string Name
         {
-            get { return player.Name; }
+            get
+            {
+                return Player.Name;
+            }
         }
-        public Scoreboard Result
+
+        public void AddToPlayerScore(PlayerScore playerScore)
         {
-            get { return player.Result; }
+            playerScore.Player = Player;
+            //playerScore.Scoreboard = new Scoreboard();
+        }
+
+        //public void RemoveFromGame(Game game)
+        //{
+        //    game.Players.Remove(Player);
+        //}
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        private void RaisePropertyChanged(string propName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propName));
+            }
         }
     }
 }

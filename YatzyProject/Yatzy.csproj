@@ -8,6 +8,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="UserControls\Dice1.jpg" />
+    <None Remove="UserControls\Dice2.jpg" />
+    <None Remove="UserControls\Dice3.jpg" />
+    <None Remove="UserControls\Dice4.jpg" />
+    <None Remove="UserControls\Dice5.jpg" />
+    <None Remove="UserControls\Dice6.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.11">
       <PrivateAssets>all</PrivateAssets>
@@ -18,6 +27,15 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ViewModels\ViewModels.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="UserControls\Dice1.jpg" />
+    <Resource Include="UserControls\Dice2.jpg" />
+    <Resource Include="UserControls\Dice3.jpg" />
+    <Resource Include="UserControls\Dice4.jpg" />
+    <Resource Include="UserControls\Dice5.jpg" />
+    <Resource Include="UserControls\Dice6.jpg" />
   </ItemGroup>
 
 </Project>

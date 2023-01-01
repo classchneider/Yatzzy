@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using YatzyRepository;
 
@@ -11,9 +12,10 @@ using YatzyRepository;
 namespace YatzyRepository.Migrations
 {
     [DbContext(typeof(Model))]
-    partial class ModelModelSnapshot : ModelSnapshot
+    [Migration("20230101010238_Gamedate")]
+    partial class Gamedate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,10 +39,15 @@ namespace YatzyRepository.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("PlayerId")
+                        .HasColumnType("int");
+
                     b.Property<int>("ScoreboardId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PlayerId");
 
                     b.HasIndex("ScoreboardId");
 
@@ -55,16 +62,11 @@ namespace YatzyRepository.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int?>("GameId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("GameId");
 
                     b.ToTable("Players");
                 });
@@ -129,25 +131,21 @@ namespace YatzyRepository.Migrations
 
             modelBuilder.Entity("YatzyRepository.Game", b =>
                 {
+                    b.HasOne("YatzyRepository.Player", "Player")
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("YatzyRepository.Scoreboard", "Scoreboard")
                         .WithMany()
                         .HasForeignKey("ScoreboardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Player");
+
                     b.Navigation("Scoreboard");
-                });
-
-            modelBuilder.Entity("YatzyRepository.Player", b =>
-                {
-                    b.HasOne("YatzyRepository.Game", null)
-                        .WithMany("Players")
-                        .HasForeignKey("GameId");
-                });
-
-            modelBuilder.Entity("YatzyRepository.Game", b =>
-                {
-                    b.Navigation("Players");
                 });
 #pragma warning restore 612, 618
         }

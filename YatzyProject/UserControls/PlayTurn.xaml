@@ -1,0 +1,33 @@
+﻿<UserControl x:Class="Yatzy.UserControls.UPlayTurn"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Yatzy.UserControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="200">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="350"></RowDefinition>
+            <RowDefinition Height="100" />
+        </Grid.RowDefinitions>
+        <Grid x:Name="TopGrid" VerticalAlignment="Bottom" HorizontalAlignment="Left" Background="White"
+              Grid.Row="0">
+            <StackPanel Name="TopStack" Orientation="Vertical" VerticalAlignment="Stretch">
+                <DockPanel Name="TopTopPanel" VerticalAlignment="Top" />
+                <DockPanel x:Name="TopBotPanel" VerticalAlignment="Top" />
+            </StackPanel>
+        </Grid>
+        <Grid x:Name="BottomGrid"
+              Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="1" x:Name="BotPanel" VerticalAlignment="Top" Orientation="Vertical" Margin="10" HorizontalAlignment="Right">
+                <Button Margin="0,0,0,5" x:Name="btn_Roll" Content="Roll" Click="btn_Roll_Click" FontSize="22"></Button>
+                <Button Margin="0" x:Name="btn_Select" Content="Register" Click="btn_Select_Click" FontSize="22"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

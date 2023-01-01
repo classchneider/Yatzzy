@@ -36,7 +36,79 @@ namespace Yatzy.UserControls
 
         private void btn_AddPlayer_Click(object sender, RoutedEventArgs e)
         {
-            viewModel.AddPlayer(tb_Name.Text);
+            viewModel.CreatePlayer(tb_Name.Text);
+            tb_Name.Text = "";
+        }
+
+        private void btn_Play_Click(object sender, RoutedEventArgs e)
+        {
+            AutomatedSelectionUpdate ++;
+            viewModel.PlayGame(tb_Game.Text);
+            AutomatedSelectionUpdate--;
+        }
+
+        private void tb_Game_GotFocus(object sender, RoutedEventArgs e)
+        {
+            tb_Game.SelectAll();
+        }
+
+        private void btn_CreateGame_Click(object sender, RoutedEventArgs e)
+        {
+            VMGame game = viewModel.CreateGame(tb_Game.Text);
+            lb_Games.SelectedItem = game;
+        }
+
+        private void lb_Games_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.AddedItems.Count > 0)
+            {
+                viewModel.SelectGame(e.AddedItems[0] as VMGame);
+            }
+            UpdateAllPlayersSelection();
+        }
+
+        int AutomatedSelectionUpdate { get; set; } = 0;
+
+        private void UpdateAllPlayersSelection()
+        {
+            AutomatedSelectionUpdate++;
+            lb_AllPlayers.UnselectAll();
+            foreach (VMPlayerScore playerScore in viewModel.CurrentGame.PlayerScores)
+            {
+                lb_AllPlayers.SelectedItems.Add(playerScore.VMPlayer);
+            }
+            AutomatedSelectionUpdate--;
+        }
+
+        private void lb_AllPlayers_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (AutomatedSelectionUpdate > 0)
+            {
+                return;
+            }
+
+            if (e.AddedItems?.Count > 0)
+            {
+                foreach (VMPlayer player in e.AddedItems)
+                {
+                    if (!viewModel.AddPlayer(player))
+                    {
+                        lb_AllPlayers.SelectedItems.Remove(player);
+                    }
+                }
+            }
+            if (e.RemovedItems?.Count > 0)
+            {
+                foreach (VMPlayer player in e.RemovedItems)
+                {
+                    viewModel.RemovePlayer(player);
+                }
+            }
+        }
+
+        private void tb_Game_GotFocus(object sender, MouseButtonEventArgs e)
+        {
+
         }
     }
 }

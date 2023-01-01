@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ViewModels;
 
 namespace Yatzy.UserControls
 {
@@ -19,10 +20,106 @@ namespace Yatzy.UserControls
     /// Interaction logic for ScoreBoard.xaml
     /// </summary>
     public partial class UCScoreBoard : UserControl
-{
-    public UCScoreBoard(Grid grid)
     {
-        InitializeComponent();
+        VMYatzyGeneral viewModel;
+
+        public UCScoreBoard(VMYatzyGeneral viewModel)
+        {
+            InitializeComponent();
+            this.viewModel = viewModel;
+        }
+
+        public string SelectedHeaderPath
+        {
+            get
+            {
+                if (dg_ScoreBoard.SelectedCells.Count > 0)
+                {
+                    return ColumnBindPath(dg_ScoreBoard.SelectedCells[0].Column as DataGridTextColumn);
+                }
+                else
+                {
+                    return "";
+                }
+            }
+        }
+
+        private string ColumnBindPath(DataGridTextColumn column)
+        {
+            if (column.Binding is Binding)
+            {
+                return (column.Binding as Binding).Path.Path;
+            }
+            else
+            {
+                return "";
+            }
+        }
+
+        private bool IsColumnBindedToPath(DataGridColumn column, string path)
+        {
+            if (ColumnBindPath(column as DataGridTextColumn) == path) 
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public string GetColumnName(string HeaderPath)
+        {
+            foreach (var col in dg_ScoreBoard.Columns)
+            {
+                if (IsColumnBindedToPath(col, HeaderPath))
+                {
+                    return col.ToString();
+                }
+            }
+            return "";
+        }
+
+        public string SelectedCellName
+        {
+            get
+            {
+                if (dg_ScoreBoard.SelectedCells.Count > 0)
+                {
+                    return dg_ScoreBoard.SelectedCells[0].Column.Header.ToString();
+                }
+                else
+                {
+                    return string.Empty;
+                }
+            }
+        }
+
+        public void ResetScoreboard()
+        {
+            dg_ScoreBoard.UnselectAllCells();
+            dg_ScoreBoard.SelectedItem = viewModel.CurrentPlayerScore;
+        }
+
+        private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Get the property associated with the selected column
+            string propertyName = ((dg_ScoreBoard.Columns[0] as System.Windows.Controls.DataGridTextColumn).Binding as Binding).Path.Path;
+        }
+
+        private void dg_ScoreBoard_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
+        {
+            if (e.AddedCells.Count == 0)
+            {
+                return;
+            }
+
+            if (viewModel.CurrentPlayerScore == null || e.AddedCells[0].Item != viewModel.CurrentPlayerScore)
+            {
+                // Wrong cell selected
+                dg_ScoreBoard.UnselectAllCells();
+                dg_ScoreBoard.SelectedItem=viewModel.CurrentPlayerScore;
+            }
+        }
     }
-}
 }
