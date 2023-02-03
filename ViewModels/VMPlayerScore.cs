@@ -25,5 +25,10 @@ namespace ViewModels
         {
             game.PlayerScores.Remove(PlayerScore);
         }
+
+        public override string ToString()
+        {
+            return $"{VMPlayer.Name}: {VMScoreboard.Sum2}";
+        }
     }
 }

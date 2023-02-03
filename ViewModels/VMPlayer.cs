@@ -28,13 +28,7 @@ namespace ViewModels
         public void AddToPlayerScore(PlayerScore playerScore)
         {
             playerScore.Player = Player;
-            //playerScore.Scoreboard = new Scoreboard();
         }
-
-        //public void RemoveFromGame(Game game)
-        //{
-        //    game.Players.Remove(Player);
-        //}
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

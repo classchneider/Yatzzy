@@ -30,6 +30,7 @@ namespace Yatzy.UserControls
 
         private Dice[] Dices { get; set; }
         private CurrentPlayer CurrentPlayer { get; set; }
+        private UTurnCounter TurnCounter { get; set; }
         int RollCount;
         bool rolling;
 
@@ -47,13 +48,21 @@ namespace Yatzy.UserControls
         {
             InitializeComponent();
             Dices = new Dice[] { Dice1, Dice2, Dice3, Dice4, Dice5 };
+
+            TurnCounter = new UTurnCounter();
+
+
             CurrentPlayer = new CurrentPlayer();
-            TopTopPanel.Children.Add(CurrentPlayer);
+            TopStack.Children.Insert(0, CurrentPlayer);
+
+            // Insert TurnCounter at top
+            TopStack.Children.Insert(0, TurnCounter);
+
 
             foreach (Dice d in Dices)
             {
                 d.Width = 80;
-                TopBotPanel.Children.Add(d);
+                TopPanel.Children.Add(d);
             }
 
             StateChange = stateChange;
@@ -61,7 +70,7 @@ namespace Yatzy.UserControls
             rolling = false;
         }
 
-        public void ResetDices()
+        public void ResetDices(bool enable = true)
         {
             foreach (Dice d in Dices)
             {
@@ -69,17 +78,22 @@ namespace Yatzy.UserControls
                 d.Hold = false;
                 d.Reset();
             }
-            EnableButtons();
             RollCount = 0;
+            EnableButtons(enable);
         }
 
-        private void EnableButtons()
+        public void SortPlayers()
         {
-            btn_Roll.IsEnabled = RollCount < 3;
-            btn_Select.IsEnabled = RollCount > 0;
+            TurnCounter.SortPlayers();
         }
 
-        private async void btn_Roll_Click(object sender, RoutedEventArgs e)
+        private void EnableButtons(bool enable = true)
+        {
+            btn_Roll.IsEnabled = RollCount < 3 && enable;
+            btn_Select.IsEnabled = RollCount > 0 && enable;
+        }
+
+        private async void Roll()
         {
             // Abort if already rolling or after 3 rolls.
             if (RollCount > 2 || rolling)
@@ -100,6 +114,11 @@ namespace Yatzy.UserControls
             }
             EnableButtons();
             rolling = false;
+        }
+
+        private async void btn_Roll_Click(object sender, RoutedEventArgs e)
+        {
+            Roll();
         }
 
         private void btn_Select_Click(object sender, RoutedEventArgs e)

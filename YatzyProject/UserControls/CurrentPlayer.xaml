@@ -8,7 +8,7 @@
              d:DesignHeight="450" d:DesignWidth="400">
     <Grid>
         <StackPanel Orientation="Horizontal">
-            <TextBlock  Margin="10,20,0,0" TextWrapping="Wrap" Text="Player:" VerticalAlignment="Top" FontSize="48"/>
+            <TextBlock  Margin="10,20,0,0" TextWrapping="Wrap" Text="Spiller:" VerticalAlignment="Top" FontSize="48"/>
             <TextBlock  Margin="10,20,0,0" TextWrapping="Wrap" Text="{Binding CurrentPlayer.Name}" VerticalAlignment="Top" FontSize="48"/>
         </StackPanel>
     </Grid>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -58,7 +59,7 @@ namespace Yatzy.UserControls
 
         private bool IsColumnBindedToPath(DataGridColumn column, string path)
         {
-            if (ColumnBindPath(column as DataGridTextColumn) == path) 
+            if (ColumnBindPath(column as DataGridTextColumn) == path)
             {
                 return true;
             }
@@ -99,6 +100,21 @@ namespace Yatzy.UserControls
         {
             dg_ScoreBoard.UnselectAllCells();
             dg_ScoreBoard.SelectedItem = viewModel.CurrentPlayerScore;
+            //SortScoreBoard();
+            dg_ScoreBoard.Items.Refresh();
+        }
+
+        private void SortScoreBoard()
+        {
+            // Clear current sort descriptions
+            dg_ScoreBoard.Items.SortDescriptions.Clear();
+
+            // Add the new sort description
+            dg_ScoreBoard.Items.SortDescriptions.Add(
+                new System.ComponentModel.SortDescription(
+                    dg_ScoreBoard.Columns[dg_ScoreBoard.Columns.Count - 1].SortMemberPath,
+                    ListSortDirection.Descending)
+                );
         }
 
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -117,9 +133,14 @@ namespace Yatzy.UserControls
             if (viewModel.CurrentPlayerScore == null || e.AddedCells[0].Item != viewModel.CurrentPlayerScore)
             {
                 // Wrong cell selected
-                dg_ScoreBoard.UnselectAllCells();
-                dg_ScoreBoard.SelectedItem=viewModel.CurrentPlayerScore;
+                SelectPlayer(viewModel.CurrentPlayerScore);
             }
+        }
+
+        public void SelectPlayer(VMPlayerScore? playerScore)
+        {
+            dg_ScoreBoard.UnselectAllCells();
+            dg_ScoreBoard.SelectedItem = playerScore;
         }
     }
 }

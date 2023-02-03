@@ -5,17 +5,20 @@ namespace YatzyRepository
 {
     public class Model : DbContext
     {
-        public Model()
-        {
-            Players.Load();
-            Games.Load();
-        }
         public DbSet<Player> Players { get; set; }
         public DbSet<Scoreboard> Scoreboards { get; set; }
         public DbSet<Game> Games { get; set; }
+
+        public DbSet<PlayerScore> PlayerScores { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
             options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=EF_Yatzy; Trusted_Connection = True; ");
+
+            //Players.Load();
+            //Scoreboards.Load();
+            //Games.Load();
+            //PlayerScores.Load();
         }
 
         //public ObservableCollection<Player> PlayerList
@@ -60,9 +63,15 @@ namespace YatzyRepository
 
     public class Game
     {
+        //public Game()
+        //{
+        //    NextPlayserScoreIndex = 0;
+        //}
+
         public int Id { get; set; }
         public string Name { get; set; }
         public DateTime Date { get; set; }
+        public int NextPlayerScoreIndex { get; set; } = 0;
         public List<PlayerScore> PlayerScores { get; set; } = new List<PlayerScore>();
     }
 

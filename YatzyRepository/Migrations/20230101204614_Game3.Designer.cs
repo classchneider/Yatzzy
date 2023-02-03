@@ -12,8 +12,8 @@ using YatzyRepository;
 namespace YatzyRepository.Migrations
 {
     [DbContext(typeof(Model))]
-    [Migration("20221208165755_fullresult")]
-    partial class fullresult
+    [Migration("20230101204614_Game3")]
+    partial class Game3
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -23,6 +23,29 @@ namespace YatzyRepository.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+
+            modelBuilder.Entity("YatzyRepository.Game", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NextPlayerScoreIndex")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Games");
+                });
 
             modelBuilder.Entity("YatzyRepository.Player", b =>
                 {
@@ -36,14 +59,37 @@ namespace YatzyRepository.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ResultId")
+                    b.HasKey("Id");
+
+                    b.ToTable("Players");
+                });
+
+            modelBuilder.Entity("YatzyRepository.PlayerScore", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int?>("GameId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlayerId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ScoreboardId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ResultId");
+                    b.HasIndex("GameId");
 
-                    b.ToTable("Players");
+                    b.HasIndex("PlayerId");
+
+                    b.HasIndex("ScoreboardId");
+
+                    b.ToTable("PlayerScores");
                 });
 
             modelBuilder.Entity("YatzyRepository.Scoreboard", b =>
@@ -104,15 +150,32 @@ namespace YatzyRepository.Migrations
                     b.ToTable("Scoreboards");
                 });
 
-            modelBuilder.Entity("YatzyRepository.Player", b =>
+            modelBuilder.Entity("YatzyRepository.PlayerScore", b =>
                 {
-                    b.HasOne("YatzyRepository.Scoreboard", "Result")
+                    b.HasOne("YatzyRepository.Game", null)
+                        .WithMany("PlayerScores")
+                        .HasForeignKey("GameId");
+
+                    b.HasOne("YatzyRepository.Player", "Player")
                         .WithMany()
-                        .HasForeignKey("ResultId")
+                        .HasForeignKey("PlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Result");
+                    b.HasOne("YatzyRepository.Scoreboard", "Scoreboard")
+                        .WithMany()
+                        .HasForeignKey("ScoreboardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Player");
+
+                    b.Navigation("Scoreboard");
+                });
+
+            modelBuilder.Entity("YatzyRepository.Game", b =>
+                {
+                    b.Navigation("PlayerScores");
                 });
 #pragma warning restore 612, 618
         }

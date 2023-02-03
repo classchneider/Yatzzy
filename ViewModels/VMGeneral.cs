@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Reflection;
 using YatzyRepository;
@@ -15,10 +16,10 @@ namespace ViewModels
             _VMGames = new ReadOnlyObservableCollection<VMGame>(games);
         }
 
-        public enum GameStates { SetupGame, NewGame, SelectScore, NewTurn };
+        public enum GameStates { SetupGame, RunGame, SelectScore, NewTurn, EndGame };
 
         GameStates gameState;
-        private GameStates GameState
+        public GameStates GameState
         {
             get
             {
@@ -59,13 +60,45 @@ namespace ViewModels
         /// 
         private ObservableCollection<VMGame> games { get; set; } = new();
         private ReadOnlyObservableCollection<VMGame> _VMGames;
+
         private void LoadGames()
         {
-            foreach (Game g in Model.Games)
+            if (Model.Games.Local.Count() == 0)
             {
-                VMGame game = new VMGame(g);
+                Model.Games.Load();
+            }
+
+            if (Model.PlayerScores.Local.Count() == 0)
+            {
+                Model.PlayerScores.Load();
+            }
+
+            if (Model.Scoreboards.Local.Count() == 0)
+            {
+                Model.Scoreboards.Load();
+            }
+
+            foreach (Game g in Model.Games.Local)
+            {
+                VMGame game = new VMGame(g, Model);
+                game.LoadPlayerScores();
                 games.Add(game);
             }
+        }
+
+        public VMGame NewGame()
+        {
+            VMGame game;
+            if (CurrentGame != null)
+            {
+                game = CloneGame();
+            }
+            else
+            {
+                Game g = new Game();
+                game = new VMGame(g, Model);
+            }
+            return game;
         }
 
         public ReadOnlyObservableCollection<VMGame> Games
@@ -75,16 +108,38 @@ namespace ViewModels
                 return _VMGames;
             }
         }
+
+        /// 
+        /// Finished games
+        /// 
+        public IEnumerable<VMGame> FinishedGames
+        {
+            get
+            {
+                return Games.Where(g => g.CurrentPlayerIsGameOver);
+            }
+        }
+
+        /// 
+        /// Unfinished games
+        /// 
+        public IEnumerable<VMGame> ActiveGames
+        {
+            get
+            {
+                return Games.Where(g => !g.CurrentPlayerIsGameOver);
+            }
+        }
+
         public VMGame? CurrentGame { get; private set; }
 
-        int CurrentPlayerScoreIndex = -1;
         public VMPlayerScore? CurrentPlayerScore
         {
             get
             {
-                if (CurrentPlayerScoreIndex >= 0)
+                if (CurrentGame?.NextPlayerScoreIndex >= 0 && CurrentGame?.NextPlayerScoreIndex < CurrentGame?.PlayerScores.Count)
                 {
-                    return CurrentGame?.PlayerScores[CurrentPlayerScoreIndex];
+                    return CurrentGame?.PlayerScores[CurrentGame.NextPlayerScoreIndex];
                 }
                 else
                 {
@@ -99,7 +154,7 @@ namespace ViewModels
 
         // delegates
         public delegate void StateChangeMethod(GameStates state);
-        public delegate bool ConfirmMethod(string question, string title = "Confirm Action");
+        public delegate bool ConfirmMethod(string question, string title = "Bekræft handling");
 
         public StateChangeMethod? UIStateChange { private get; set; }
         public ConfirmMethod? UIConfirm { private get; set; }
@@ -114,42 +169,80 @@ namespace ViewModels
             }
         }
 
-        private void NewGame()
+        public void GameSetup()
         {
-            CurrentPlayerScoreIndex = 0;
+            StateChange(GameStates.SetupGame);
+        }
+
+        public VMGame CloneGame()
+        {
+            if (CurrentGame == null)
+            {
+                throw new ArgumentNullException("No game selected");
+            }
+            VMGame game = CurrentGame.CloneEmpty();
+            games.Add(game);
+            RaisePropertyChanged(nameof(ActiveGames));
+            return game;
         }
 
         private void NextPlayer()
         {
             if (CurrentGame != null)
             {
-                CurrentPlayerScoreIndex = (CurrentPlayerScoreIndex + 1) % CurrentGame.PlayerScores.Count;
+                CurrentGame.NextPlayerScoreIndex = (CurrentGame.NextPlayerScoreIndex + 1) % CurrentGame.PlayerScores.Count;
+                Model.SaveChanges();
                 RaisePropertyChanged(nameof(CurrentPlayer));
+                RaisePropertyChanged(nameof(CurrentPlayerScore));
+            }
+        }
+
+        public bool IsGameOver
+        {
+            get
+            {
+                if (CurrentGame == null || CurrentGame.CurrentPlayerIsGameOver)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
 
         private void StateChange(GameStates state)
         {
+
             GameState = state;
 
-            switch (state)
+
+            switch (GameState)
             {
-                case GameStates.NewGame:
-                    NewGame();
+                case GameStates.RunGame:
                     break;
                 case GameStates.NewTurn:
                     NextPlayer();
-                    if (UIStateChange != null)
+                    if (IsGameOver)
                     {
-                        UIStateChange(GameStates.NewTurn);
+                        GameState = GameStates.EndGame;
                     }
+                    break;
+                case GameStates.SetupGame:
+                    // No action, all is handled in View
                     break;
             }
 
             // Let UI reflect state change
-            if (UIStateChange != null)
+            UIStateChange?.Invoke(GameState);
+        }
+
+        public VMPlayerScore? LeadingPlayer
+        {
+            get
             {
-                UIStateChange(GameState);
+                return CurrentGame != null ? CurrentGame.LeadingPlayer : null;
             }
         }
 
@@ -199,8 +292,7 @@ namespace ViewModels
 
         public void PlayGame(string gameName)
         {
-            CurrentPlayerScoreIndex = 0;
-            StateChange(GameStates.NewGame);
+            StateChange(GameStates.RunGame);
         }
 
         public VMGame CreateGame(string name)
@@ -209,17 +301,21 @@ namespace ViewModels
             {
                 Name = name,
             };
-            VMGame vmGame = new VMGame(game);
+            VMGame vmGame = new VMGame(game, Model);
             games.Add(vmGame);
             Model.Games.Add(game);
             Model.SaveChanges();
             RaisePropertyChanged(nameof(Games));
+            RaisePropertyChanged(nameof(ActiveGames));
+            
             return vmGame;
         }
 
         public void SelectGame(VMGame game)
         {
             CurrentGame = game;
+            game.LoadPlayerScores();
+
             RaisePropertyChanged(nameof(CurrentGame));
         }
 
@@ -237,16 +333,16 @@ namespace ViewModels
             {
                 if (propInfo != null)
                 {
-                    throw new Exception($"{columnName} is already used");
+                    throw new Exception($"Kategorien {columnName} er allerede brugt");
                 }
                 else
                 {
-                    throw new Exception("No cell selected");
+                    throw new Exception("Vælg en kategori");
                 }
             }
 
             int score = CalculateScore(propInfo.Name, scores, columnName);
-            if (UIConfirm == null || UIConfirm($"Register {score} points in {columnName}?"))
+            if (UIConfirm == null || UIConfirm($"Gem {score} points i {columnName}?"))
             {
                 propInfo.SetValue(source, score, null);
                 Model.SaveChanges();
@@ -327,7 +423,7 @@ namespace ViewModels
                 return CalculateYatzy(scores);
             }
 
-            throw new ArgumentException($"Unknown column '{columnName}'");
+            throw new ArgumentException($"Ukendt kolonne '{columnName}'");
         }
 
         private int[] CountScores(int[] scores)

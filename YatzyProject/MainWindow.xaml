@@ -5,18 +5,33 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ViewModels;assembly=ViewModels"
         mc:Ignorable="d"
-        Title=" -- The amazing Yatzy game -- " Height="800" Width="1000">
+        Title=" -- The amazing Yatzy game -- " Height="750" Width="1200">
     <Window.DataContext>
         <local:VMYatzyGeneral/>
     </Window.DataContext>
-    <Grid x:Name="GameGrid" Background="White">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="1*" />
-        </Grid.ColumnDefinitions>
-        <Grid x:Name="g_Left" Grid.Column="0">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <DockPanel Grid.Row="0">
+            <Menu DockPanel.Dock="Top" VerticalAlignment="Top" Height="20" Margin="0,0,0,0" >
+                <MenuItem Header="_File">
+                    <MenuItem Header="_New Game" Name="Menu_New" Click="Menu_New_Click"/>
+                    <Separator />
+                    <MenuItem Header="_Exit" Name="Menu_Exit" Click="Menu_Exit_Click" />
+                </MenuItem>
+            </Menu>
+        </DockPanel>
+        <Grid Grid.Row="1" x:Name="GameGrid" Background="White">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid x:Name="g_Left" Grid.Column="0">
+            </Grid>
+            <Grid x:Name="g_Right" Grid.Column="1">
+            </Grid>
         </Grid>
-        <Grid x:Name="g_Right" Grid.Column="1">
-        </Grid>
-    </Grid>
+    </Grid> 
 </Window>

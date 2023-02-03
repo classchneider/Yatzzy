@@ -1,26 +1,25 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace YatzyRepository.Migrations
 {
-    public partial class Gamedate : Migration
+    public partial class Game4 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<DateTime>(
-                name: "Date",
+            migrationBuilder.AddColumn<bool>(
+                name: "GameEnded",
                 table: "Games",
-                type: "datetime2",
+                type: "bit",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: false);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Date",
+                name: "GameEnded",
                 table: "Games");
         }
     }

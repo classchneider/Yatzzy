@@ -34,14 +34,21 @@ namespace Yatzy
         {
             InitializeComponent();
             ViewModel = DataContext as VMYatzyGeneral;
-            //DataContext = this;
+            ViewModel.UIStateChange = ViewChangeState;
+            ViewModel.UIConfirm = ConfirmAction;
+
             scoreboard = new UCScoreBoard(ViewModel);
             setupGame = new USetupGame(ViewModel, g_Left);
             turnPlay = new UPlayTurn(ViewChangeState);
+
             g_Right.Children.Add(scoreboard);
+            GotoSetup();
+        }
+
+        public void GotoSetup()
+        {
+            g_Left.Children.Clear();
             g_Left.Children.Add(setupGame);
-            ViewModel.UIStateChange = ViewChangeState;
-            ViewModel.UIConfirm = ConfirmAction;
         }
 
         public void NewGame()
@@ -53,7 +60,8 @@ namespace Yatzy
 
         private void Reset()
         {
-            turnPlay.ResetDices();
+            turnPlay.ResetDices(!ViewModel.IsGameOver);
+            turnPlay.SortPlayers();
             scoreboard.ResetScoreboard();
         }
 
@@ -74,7 +82,7 @@ namespace Yatzy
             {
                 switch (state)
                 {
-                    case GameStates.NewGame:
+                    case GameStates.RunGame:
                         NewGame();
                         break;
                     case GameStates.SelectScore:
@@ -83,17 +91,33 @@ namespace Yatzy
                     case GameStates.NewTurn:
                         Reset();
                         break;
+                    case GameStates.EndGame:
+                        Reset(); 
+                        scoreboard.SelectPlayer(ViewModel.LeadingPlayer);
+                        break;
+                    case GameStates.SetupGame:
+                        GotoSetup();
+                        break;
                 }
             }
             catch (CellAlreadyUsedException ex)
             {
-                string column = scoreboard.SelectedCellName;
-                MessageBox.Show($"{column} already used");
+                MessageBox.Show($"{scoreboard.SelectedCellName} er allerede brugt");
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Cannot Register score");
+                MessageBox.Show(ex.Message, $"Score kan ikke registreres i {scoreboard.SelectedCellName}");
             }
+        }
+
+        private void Menu_New_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.GameSetup();
+        }
+
+        private void Menu_Exit_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
         }
     }
 }

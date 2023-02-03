@@ -29,11 +29,6 @@ namespace Yatzy.UserControls
             viewModel = vMYatzy;
         }       
 
-        private void DemoButton_Click(object sender, RoutedEventArgs e)
-        {
-            viewModel.DemoVersion();
-        }
-
         private void btn_AddPlayer_Click(object sender, RoutedEventArgs e)
         {
             viewModel.CreatePlayer(tb_Name.Text);
@@ -47,15 +42,17 @@ namespace Yatzy.UserControls
             AutomatedSelectionUpdate--;
         }
 
-        private void tb_Game_GotFocus(object sender, RoutedEventArgs e)
-        {
-            tb_Game.SelectAll();
-        }
-
         private void btn_CreateGame_Click(object sender, RoutedEventArgs e)
         {
             VMGame game = viewModel.CreateGame(tb_Game.Text);
             lb_Games.SelectedItem = game;
+        }
+
+        private void btn_NewGame_Click(object sender, RoutedEventArgs e)
+        {
+            VMGame? game = viewModel.NewGame();
+            lb_Games.SelectedItem = game;
+            lb_FinishedGames.SelectedItem = null;
         }
 
         private void lb_Games_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -106,9 +103,21 @@ namespace Yatzy.UserControls
             }
         }
 
+        private async void tb_Game_GotFocus(object sender, RoutedEventArgs e)
+        {
+            await Task.Delay(10);
+            tb_Game.SelectAll();
+        }
+
         private void tb_Game_GotFocus(object sender, MouseButtonEventArgs e)
         {
-
+            tb_Game.SelectAll();
         }
+
+        private void tb_Game_GotFocus(object sender, ManipulationStartingEventArgs e)
+        {
+            tb_Game.SelectAll();
+        }
+
     }
 }

@@ -12,8 +12,8 @@ using YatzyRepository;
 namespace YatzyRepository.Migrations
 {
     [DbContext(typeof(Model))]
-    [Migration("20230101011900_Game2")]
-    partial class Game2
+    [Migration("20230102212129_Game4")]
+    partial class Game4
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -35,16 +35,17 @@ namespace YatzyRepository.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("GameEnded")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ScoreboardId")
+                    b.Property<int>("NextPlayerScoreIndex")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ScoreboardId");
 
                     b.ToTable("Games");
                 });
@@ -57,18 +58,41 @@ namespace YatzyRepository.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int?>("GameId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
+                    b.ToTable("Players");
+                });
+
+            modelBuilder.Entity("YatzyRepository.PlayerScore", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int?>("GameId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlayerId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ScoreboardId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
                     b.HasIndex("GameId");
 
-                    b.ToTable("Players");
+                    b.HasIndex("PlayerId");
+
+                    b.HasIndex("ScoreboardId");
+
+                    b.ToTable("PlayerScores");
                 });
 
             modelBuilder.Entity("YatzyRepository.Scoreboard", b =>
@@ -129,27 +153,32 @@ namespace YatzyRepository.Migrations
                     b.ToTable("Scoreboards");
                 });
 
-            modelBuilder.Entity("YatzyRepository.Game", b =>
+            modelBuilder.Entity("YatzyRepository.PlayerScore", b =>
                 {
+                    b.HasOne("YatzyRepository.Game", null)
+                        .WithMany("PlayerScores")
+                        .HasForeignKey("GameId");
+
+                    b.HasOne("YatzyRepository.Player", "Player")
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("YatzyRepository.Scoreboard", "Scoreboard")
                         .WithMany()
                         .HasForeignKey("ScoreboardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Scoreboard");
-                });
+                    b.Navigation("Player");
 
-            modelBuilder.Entity("YatzyRepository.Player", b =>
-                {
-                    b.HasOne("YatzyRepository.Game", null)
-                        .WithMany("Players")
-                        .HasForeignKey("GameId");
+                    b.Navigation("Scoreboard");
                 });
 
             modelBuilder.Entity("YatzyRepository.Game", b =>
                 {
-                    b.Navigation("Players");
+                    b.Navigation("PlayerScores");
                 });
 #pragma warning restore 612, 618
         }

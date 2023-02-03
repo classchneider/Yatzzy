@@ -140,7 +140,7 @@ namespace ViewModels
             get => Scoreboard.TwoPairs;
             set => Scoreboard.TwoPairs = value;
         }
-        
+
         public int? ThreeSame
         {
             get => Scoreboard.ThreeSame;
@@ -192,6 +192,29 @@ namespace ViewModels
                     (House != null ? House.Value : 0) +
                     (Chance != null ? Chance.Value : 0) +
                     (Yatzy != null ? Yatzy.Value : 0);
+            }
+        }
+
+        public bool IsFull
+        {
+            get
+            {
+                return
+                    Ones.HasValue &&
+                    Twos.HasValue &&
+                    Threes.HasValue &&
+                    Fours.HasValue &&
+                    Fives.HasValue &&
+                    Sixes.HasValue &&
+                    Pair.HasValue &&
+                    TwoPairs.HasValue &&
+                    ThreeSame.HasValue &&
+                    FourSame.HasValue &&
+                    LittleStraight.HasValue &&
+                    GreatStraight.HasValue &&
+                    House.HasValue &&
+                    Chance.HasValue &&
+                    Yatzy.HasValue;
             }
         }
     }

@@ -20,7 +20,7 @@ namespace Yatzy.UserControls
     /// </summary>
     public partial class Dice : UserControl
     {
-        Random random = new Random();
+        static Random random = new Random();
         bool hold = false;
         public bool Hold
         {
@@ -34,6 +34,8 @@ namespace Yatzy.UserControls
             }
         }
         bool rolling = false;
+
+        private int LastSide { get; set; } = -1;
         public int DiceValue { get; private set; }
 
         public bool CanHold { get; set; }
@@ -60,7 +62,7 @@ namespace Yatzy.UserControls
             {
                 tmpDice = random.Next(1, 7);
                 ShowDice(tmpDice);
-                await Task.Delay(150);
+                await Task.Delay(100);
             }
             DiceValue = tmpDice;
             rolling = false;
@@ -76,13 +78,21 @@ namespace Yatzy.UserControls
         private void ShowDice(int dice)
         {
             // Hide all dices
-            foreach (Image i in Dices)
+            if (LastSide > 0)
             {
-                i.Visibility = Visibility.Hidden;
+                Dices[LastSide - 1].Visibility = Visibility.Hidden;
+            }
+            else
+            {
+                foreach (Image i in Dices)
+                {
+                    i.Visibility = Visibility.Hidden;
+                }
             }
 
             // Show the correct dice
             Dices[dice - 1].Visibility = Visibility.Visible;
+            LastSide = dice;
         }
 
         private void Reframe()

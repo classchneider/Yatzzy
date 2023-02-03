@@ -5,9 +5,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Yatzy.UserControls"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <DataGrid FontSize="18" Name="dg_ScoreBoard" SelectionUnit="CellOrRowHeader" HeadersVisibility="Column" ItemsSource="{Binding CurrentGame.PlayerScores}" FlowDirection="RightToLeft" IsReadOnly="True" HorizontalAlignment="Right" VerticalAlignment="Top" AutoGenerateColumns="False" MinHeight="231" Margin="40,40,40,40" MinWidth="532" SelectionChanged="DataGrid_SelectionChanged" SelectedCellsChanged="dg_ScoreBoard_SelectedCellsChanged">
+             d:DesignHeight="700" d:DesignWidth="850">
+    <Grid MinHeight="690" Margin="40,40,40,40" >
+        <DataGrid FontSize="18" Name="dg_ScoreBoard" SelectionUnit="CellOrRowHeader" HeadersVisibility="Column" ItemsSource="{Binding CurrentGame.PlayerScores}" FlowDirection="RightToLeft" IsReadOnly="True" HorizontalAlignment="Right" VerticalAlignment="Top" AutoGenerateColumns="False" SelectionChanged="DataGrid_SelectionChanged" SelectedCellsChanged="dg_ScoreBoard_SelectedCellsChanged" CanUserSortColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False">
             <DataGrid.ColumnHeaderStyle>
                 <Style TargetType="{x:Type DataGridColumnHeader}">
                     <Setter Property="LayoutTransform">
@@ -18,11 +18,6 @@
                         </Setter.Value>
                     </Setter>
                     <Setter Property="HorizontalContentAlignment" Value="Right"/>
-                    <Style.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="ToolTip" Value="Click to sort"/>
-                        </Trigger>
-                    </Style.Triggers>
                 </Style>
             </DataGrid.ColumnHeaderStyle>
             <DataGrid.CellStyle>
@@ -42,7 +37,13 @@
                 </TransformGroup>
             </DataGrid.LayoutTransform>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Navn" Binding="{Binding VMPlayer.Name}"/>
+                <DataGridTextColumn Header="Navn" Binding="{Binding VMPlayer.Name}" >
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Right" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
                 <DataGridTextColumn Header="1ere" Binding="{Binding VMScoreboard.Ones}" />
                 <DataGridTextColumn Header="2ere" Binding="{Binding VMScoreboard.Twos}" />
                 <DataGridTextColumn Header="3ere" Binding="{Binding VMScoreboard.Threes}" />
@@ -51,8 +52,7 @@
                 <DataGridTextColumn Header="6ere" Binding="{Binding VMScoreboard.Sixes}" />
                 <DataGridTextColumn Header="Sum" Binding="{Binding VMScoreboard.SumEvalueate}" />
                 <DataGridTextColumn Header="Bonus" Binding="{Binding VMScoreboard.Bonus}" />
-                <DataGridTextColumn Header="Et par" Binding="{Binding VMScoreboard.Pair}" >
-                </DataGridTextColumn>
+                <DataGridTextColumn Header="Et par" Binding="{Binding VMScoreboard.Pair}" />
                 <DataGridTextColumn Header="To par" Binding="{Binding VMScoreboard.TwoPairs}" />
                 <DataGridTextColumn Header="Tre ens" Binding="{Binding VMScoreboard.ThreeSame}" />
                 <DataGridTextColumn Header="Fire ens" Binding="{Binding VMScoreboard.FourSame}" />
