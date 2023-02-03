@@ -56,7 +56,7 @@ namespace Yatzy.UserControls
                 return DiceValue;
             }
             rolling = true;
-            int count = 20;
+            int count = random.Next(10,30);
             int tmpDice = -1;
             for (int i = 0; i < count; i++)
             {

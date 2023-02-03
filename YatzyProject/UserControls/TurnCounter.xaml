@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="400">
     <Grid>
-        <DataGrid Name="gbTurnCounter" AutoGenerateColumns="False" ItemsSource="{Binding CurrentGame.PlayerScoresCopy}" SelectedItem="{Binding CurrentPlayerScore, Mode=OneWay}" FontSize="22">
+        <DataGrid Name="gbTurnCounter" AutoGenerateColumns="False" ItemsSource="{Binding CurrentGame.PlayerScoresCopy}" SelectedItem="{Binding CurrentPlayerScore, Mode=OneWay}" MinWidth="0" HorizontalAlignment="Left" FontSize="22">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Navn" Binding="{Binding VMPlayer.Name}"/>
                 <DataGridTextColumn Header="Sum" Binding="{Binding VMScoreboard.Sum2}"/>
