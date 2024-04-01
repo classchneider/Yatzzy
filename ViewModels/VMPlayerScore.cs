@@ -21,9 +21,9 @@ namespace ViewModels
         public VMPlayer VMPlayer { get; set; }
         public VMScoreboard VMScoreboard { get; set; }
 
-        public HoldInfo[]? Holds(int[] Results, List<(string property, int value)> suggestions, int diceCount)
+        public HoldInfo[]? Holds(int[] Results, int diceCount)
         {
-            return VMPlayer.Holds(Results, suggestions, VMScoreboard, diceCount);
+            return VMPlayer.Holds(Results, VMScoreboard, diceCount);
         }
 
         public PropertyInfo SelectScore(List<(string property, int value)> suggestions, int[] Results, int diceCount)

@@ -23,7 +23,7 @@ namespace ViewModels
 
         public abstract PropertyInfo SelectScore(List<(string property, int value)> suggestions, int[] Results, VMScoreboard Scoreboard, int diceCount);
 
-        public abstract HoldInfo[]? Holds(int[] Results, List<(string property, int value)> suggestions, VMScoreboard Scoreboard, int diceCount);
+        public abstract HoldInfo[]? Holds(int[] Results, VMScoreboard Scoreboard, int diceCount);
 
         public abstract RollActions Action { get; }
         public static VMPlayer CreateVMPlayer(Player player)

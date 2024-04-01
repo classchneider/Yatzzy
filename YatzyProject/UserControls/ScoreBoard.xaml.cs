@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ViewModels;
+using YatzyRepository;
 
 namespace Yatzy.UserControls
 {
@@ -179,6 +180,30 @@ namespace Yatzy.UserControls
         private DataGridCell GetCell(int rowIndex, DataGridColumn column)
         {
             return GetCell(rowIndex, column.DisplayIndex);
+        }
+
+        public async void MarkScoreChoice((string property, int value) suggestion, VMPlayer player)
+        {
+            await Task.Delay(100);
+            int rowIndex = viewModel.GetPlayerIndex(player);
+            if (rowIndex >= 0)
+            {
+                foreach (var column in dg_ScoreBoard.Columns)
+                {
+                    if (IsColumnBindedToPath(column, $"{nameof(VMScoreboard)}.{suggestion.property}"))
+                    {
+
+                        DataGridCell cell = GetCell(rowIndex, column);
+                        Brush b = cell.Background;
+                        cell.Background = Brushes.Blue;
+                        //cell.Content = suggestion.value;
+                        await Task.Delay(3000);
+                        cell.Background = b;
+                        //cell.Content = suggestion.value;
+                        break;
+                    }
+                }
+            }
         }
 
         public void MarkScoreSuggestions(List<(string property, int value)> suggestions)

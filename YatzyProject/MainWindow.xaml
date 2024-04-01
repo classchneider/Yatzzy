@@ -24,7 +24,9 @@
                 <MenuItem Header="_Debug">
                     <MenuItem Header="Suggestions" Name="Menu_Suggestions" Click="Menu_Suggestions_Click"/>
                     <MenuItem Header="Bot Holds" Name="Menu_Holds" Click="Menu_Holds_Click"/>
-                </MenuItem>
+                    <MenuItem Header="Bot SelectScore" Name="Menu_Select" Click="Menu_Select_Click"/>
+
+               </MenuItem>
             </Menu>
         </DockPanel>
         <Grid Grid.Row="1" x:Name="GameGrid" Background="White">

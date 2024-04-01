@@ -13,7 +13,7 @@ namespace ViewModels
         public VMPlayerHuman(Player player) : base(player)
         {
         }
-        public override HoldInfo[]? Holds(int[] Results, List<(string property, int value)> suggestions, VMScoreboard Scoreboard, int diceCount)
+        public override HoldInfo[]? Holds(int[] Results, VMScoreboard Scoreboard, int diceCount)
         {
             return null;
         }

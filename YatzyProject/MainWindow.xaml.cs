@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -17,6 +18,7 @@ using System.Windows.Shapes;
 using ViewModels;
 using Yatzy.UserControls;
 using YatzyRepository;
+using static System.Formats.Asn1.AsnWriter;
 using static ViewModels.VMYatzyGeneral;
 
 namespace Yatzy
@@ -38,6 +40,7 @@ namespace Yatzy
             ViewModel = DataContext as VMYatzyGeneral;
             ViewModel.UIStateChange = ViewChangeState;
             ViewModel.UIConfirm = ConfirmAction;
+            ViewModel.ValueChangedHandler += ValueSet;
 
             scoreboard = new UCScoreBoard(ViewModel);
             setupGame = new USetupGame(ViewModel, g_Left);
@@ -45,6 +48,12 @@ namespace Yatzy
 
             g_Right.Children.Add(scoreboard);
             GotoSetup();
+        }
+
+        private void ValueSet(object? sender, PropertyChangedEventArgs e)
+        {
+            int[] sortedScores = PlayerScore.CountScores(turnPlay.Results);
+            scoreboard.MarkScoreChoice(ViewModel.GenerateSuggestion(sortedScores, e.PropertyName), sender as VMPlayer);
         }
 
         public void GotoSetup()
@@ -67,10 +76,6 @@ namespace Yatzy
             scoreboard.ResetScoreboard();
         }
 
-        public void SelectScore()
-        {
-        }
-
         public void SelectScore(string ColumnName)
         {
             ViewModel.SelectScore(scoreboard.SelectedHeaderPath, turnPlay.Results, ColumnName);
@@ -87,13 +92,19 @@ namespace Yatzy
             return (res == MessageBoxResult.OK);
         }
 
-        public void AskPlayerAction()
+        public async void AskPlayerAction()
         {
-            turnPlay.SetHold(ViewModel.Holds(turnPlay.Results, turnPlay.RollCount));
+            HoldInfo[]? hold = ViewModel.Holds(turnPlay.Results, turnPlay.RollCount);
 
-            if (turnPlay.RollCount == 3)
+            if (hold != null)
             {
-                ViewModel.SelectScore(turnPlay.Results, turnPlay.RollCount);
+                turnPlay.SetHold(hold, false);
+
+                if (turnPlay.RollCount == 3)
+                {
+                    Task.Delay(4000);
+                    ViewModel.SelectScore(turnPlay.Results, turnPlay.RollCount);
+                }
             }
         }
 
@@ -156,6 +167,11 @@ namespace Yatzy
         private void Menu_Holds_Click(object sender, RoutedEventArgs e)
         {
             AskPlayerAction();
+        }
+
+        private void Menu_Select_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.CurrentPlayerScore.SelectScore(ViewModel.GenerateSuggestions(turnPlay.Results), turnPlay.Results, turnPlay.RollCount);
         }
     }
 }

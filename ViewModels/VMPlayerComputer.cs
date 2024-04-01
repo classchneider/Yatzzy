@@ -195,7 +195,7 @@ namespace ViewModels
             if (propName == nameof(Scoreboard.Pair))
             {
                 // Use pair as last resort
-                return ScoreDiff + score;
+                return ScoreDiff;
             }
             if (propName == nameof(Scoreboard.TwoPairs))
             {
@@ -226,7 +226,7 @@ namespace ViewModels
             if (propName == nameof(Scoreboard.Chance))
             {
                 // Very last option
-                return ScoreDiff * 2 + score / 2; ;
+                return ScoreDiff;
             }
             if (propName == nameof(Scoreboard.Yatzy))
             {
@@ -321,11 +321,43 @@ namespace ViewModels
             {
                 int points = AIPointsDirectLocal((nameof(Scoreboard.House), (MostOccurencesIndex + 1) * 3 + 2 * 3));
 
+                int ThreeOfAKind = 0;
+                int TwoOfAKind = 0;
+                for (int i = 0; i< sortedScores.Length; i++)
+                {
+                    if (sortedScores[i] >= 3)
+                    {
+                        ThreeOfAKind = 3;
+                    }
+                    else if (sortedScores[i] >= 2)
+                    {
+                        if (TwoOfAKind == 2)
+                        {
+                            ThreeOfAKind = 2;
+                        }
+                        else
+                        {
+                            TwoOfAKind = 2;
+                        }
+                    }
+                    else if (sortedScores[i] > 0)
+                    {
+                        if (ThreeOfAKind > 0)
+                        {
+                            TwoOfAKind = 1;
+                        }
+                        else
+                        {
+                            ThreeOfAKind = 1;
+                        }
+                    }
+                }
+
                 missingDices.Add(
                     new DiceCandidate
                     {
                         Property = nameof(Scoreboard.House),
-                        Missing = 5 - sortedScores[MostOccurencesIndex] - 1,
+                        Missing = 5 - ThreeOfAKind - TwoOfAKind,
                         Needed = 5,
                         Score = points
                     }
@@ -686,7 +718,7 @@ namespace ViewModels
 
             bool Keeps(int i)
             {
-                return BonusDiff(i) >= 0;
+                return Scoreboard.BonusStatus + BonusDiff(i) >= 0;
             }
 
             // Find the best score that does not jepodize the bonus
@@ -708,41 +740,41 @@ namespace ViewModels
             // No acceptable suggestion found - choose the solution with damage control
 
             // Straights
-            if (Scoreboard.LittleStraight != null)
+            if (Scoreboard.LittleStraight == null)
             {
                 return PropertyInfo(nameof(Scoreboard.LittleStraight));
             }
-            if (Scoreboard.GreatStraight != null)
+            if (Scoreboard.GreatStraight == null)
             {
                 return PropertyInfo(nameof(Scoreboard.GreatStraight));
             }
 
             // FourSame
-            if (Scoreboard.FourSame != null)
+            if (Scoreboard.FourSame == null)
             {
                 return PropertyInfo(nameof(Scoreboard.FourSame));
             }
 
             // Yatzy
-            if (Scoreboard.Yatzy != null)
+            if (Scoreboard.Yatzy == null)
             {
                 return PropertyInfo(nameof(Scoreboard.Yatzy));
             }
 
             // ThreeSame
-            if (Scoreboard.ThreeSame != null)
+            if (Scoreboard.ThreeSame == null)
             {
                 return PropertyInfo(nameof(Scoreboard.ThreeSame));
             }
 
             // House
-            if (Scoreboard.House != null)
+            if (Scoreboard.House == null)
             {
                 return PropertyInfo(nameof(Scoreboard.House));
             }
 
             // TwoPairs
-            if (Scoreboard.TwoPairs != null)
+            if (Scoreboard.TwoPairs == null)
             {
                 return PropertyInfo(nameof(Scoreboard.TwoPairs));
             }
@@ -767,37 +799,37 @@ namespace ViewModels
             // If no suggestions at all
 
             // Ones
-            if (Scoreboard.Ones != null)
+            if (Scoreboard.Ones == null)
             {
                 return PropertyInfo(nameof(Scoreboard.Ones));
             }
 
             // Twos
-            if (Scoreboard.Twos != null)
+            if (Scoreboard.Twos == null)
             {
                 return PropertyInfo(nameof(Scoreboard.Twos));
             }
 
             // Threes
-            if (Scoreboard.Threes != null)
+            if (Scoreboard.Threes == null)
             {
                 return PropertyInfo(nameof(Scoreboard.Threes));
             }
 
             // Fours
-            if (Scoreboard.Fours != null)
+            if (Scoreboard.Fours == null)
             {
                 return PropertyInfo(nameof(Scoreboard.Fours));
             }
 
             // Fives
-            if (Scoreboard.Fives != null)
+            if (Scoreboard.Fives == null)
             {
                 return PropertyInfo(nameof(Scoreboard.Fives));
             }
 
             // Sixes
-            if (Scoreboard.Sixes != null)
+            if (Scoreboard.Sixes == null)
             {
                 return PropertyInfo(nameof(Scoreboard.Sixes));
             }
@@ -805,27 +837,11 @@ namespace ViewModels
             throw new Exception("No available score to set");
         }
 
-
-        public override HoldInfo[]? Holds(int[] Results, List<(string property, int value)> suggestions, VMScoreboard Scoreboard, int diceCount)
+        public override HoldInfo[]? Holds(int[] Results, VMScoreboard Scoreboard, int diceCount)
         {
             int AcceptableAIPoints = 10 - 2 * diceCount;
             int[] sortedScores = PlayerScore.CountScores(Results);
 
-            int AIPoints(int i)
-            {
-                return AIScorePoints(suggestions[i], Scoreboard.BonusStatus, diceCount);
-            }
-
-            // Find the candidate suggestion with shortest distance to its max value
-            // Choosing a pair is a risk here (maybe pair should just always have a large distance
-            int SomeScoreCandidate = -1;
-            for (int i = 0; i < suggestions.Count; i++)
-            {
-                if (SomeScoreCandidate < 0 || AIPoints(i) > AIPoints(SomeScoreCandidate))
-                {
-                    SomeScoreCandidate = i;
-                }
-            }
             // Find the largest number of equal dices (and which dice)
             int MostOccurencesIndex = -1;
             for (int i = 0; i < sortedScores.Length; i++)
@@ -839,16 +855,6 @@ namespace ViewModels
             // If we already have a good score - hold it.
             // The score is testet by AIPoints(SomeScoreCandidate) >= AcceptableAIPoints
             HoldInfo[]? ScoreHold = null;
-            if (SomeScoreCandidate >= 0 && AIPoints(SomeScoreCandidate) >= AcceptableAIPoints)
-            {
-                ScoreHold = HoldAimProperty(suggestions[SomeScoreCandidate].property, Results, sortedScores, MostOccurencesIndex);
-
-                if (ScoreHold != null)
-                {
-                    return ScoreHold;
-                }
-            }
-
 
             // If we find out how many dice results are needed for different goals
             // we can decide which to go for.
@@ -867,7 +873,6 @@ namespace ViewModels
 
             // Now we have to look for something more difficult
             // Find the choice with the smallest number of missing dices
-
             DiceCandidate? AimCandidate = null;
             foreach (DiceCandidate diceCandidate in missingDices)
             {
@@ -889,7 +894,5 @@ namespace ViewModels
 
             return HoldNothing();
         }
-
-
     }
 }

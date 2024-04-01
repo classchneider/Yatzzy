@@ -71,13 +71,14 @@ namespace Yatzy.UserControls
             rolling = false;
         }
 
-        public void SetHold(HoldInfo[] holds)
+        public void SetHold(HoldInfo[] holds, bool ButtonsAvailable = true)
         {
             if (holds == null)
             {
                 return;
             }
 
+            btn_Select.IsEnabled = ButtonsAvailable;
             for (int i=0; i< holds.Length; i++)
             {
                 Dices[i].Hold = holds[i].Hold;

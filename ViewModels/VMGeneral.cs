@@ -158,7 +158,7 @@ namespace ViewModels
 
         public HoldInfo[]? Holds(int[] Results, int diceCount)
         {
-            return CurrentPlayerScore.Holds(Results, GenerateSuggestions(Results), diceCount);
+            return CurrentPlayerScore.Holds(Results, diceCount);
         }
 
         public void SelectScore(int[] Results, int diceCount)
@@ -173,6 +173,19 @@ namespace ViewModels
         public int GetCurrentPlayerIndex()
         {
             return CurrentGame.NextPlayerScoreIndex;
+        }
+
+        public int GetPlayerIndex(VMPlayer player)
+        {
+            for (int i = 0; i < CurrentGame.PlayerScores.Count; i++)
+            {
+                if (player == CurrentGame.PlayerScores[i].VMPlayer)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
         }
 
         public VMPlayer? CurrentPlayer => CurrentPlayerScore?.VMPlayer;
@@ -204,6 +217,16 @@ namespace ViewModels
         public ConfirmMethod? UIConfirm { private get; set; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
+
+        public event PropertyChangedEventHandler? ValueChangedHandler;
+
+        private async void RaiseValueChanged(string propName)
+        {
+            if (ValueChangedHandler != null)
+            {
+                ValueChangedHandler(CurrentPlayer, new PropertyChangedEventArgs(propName));
+            }
+        }
 
         private void RaisePropertyChanged(string propName)
         {
@@ -390,12 +413,14 @@ namespace ViewModels
             SelectScore(propInfo, scores, CurrentPlayerScore.VMScoreboard, propInfo.Name, true);
         }
 
-        private void SelectScore(PropertyInfo propInfo, int[] scores, object source, string columnName, bool silent = false)
+        private async void SelectScore(PropertyInfo propInfo, int[] scores, object source, string columnName, bool silent = false)
         {
             int[] sortedScores = PlayerScore.CountScores(scores);
 
             int score = CalculateScore(propInfo.Name, sortedScores, columnName);
-            if (!silent && (UIConfirm == null || UIConfirm($"Gem {score} points i {columnName}?")))
+
+            RaiseValueChanged(propInfo.Name);
+            if (silent || UIConfirm == null || UIConfirm($"Gem {score} points i {columnName}?"))
             {
                 propInfo.SetValue(source, score, null);
                 Model.SaveChanges();
@@ -529,29 +554,40 @@ namespace ViewModels
             }
         }
 
+        public (string, int) GenerateSuggestion(int[] sortedScores, string propName)
+        {
+            string[] path = propName.Split('.');
+            object? source = GetObject(CurrentPlayerScore.VMScoreboard, path);
+
+            // Now we have the object holding the property
+            // Now set the property to the new value
+            Type? t = source?.GetType();
+            PropertyInfo? propInfo = t?.GetProperty(propName);
+
+            if (propInfo == null || propInfo.GetValue(source, null) != null)
+            {
+                return (propName, -1);
+            }
+
+            int score = CalculateScore(propName, sortedScores, propName);
+            if (score >= 0)
+            {
+                return (propName, score);
+            }
+
+            return (propName, -1);
+        }
+
         public List<(string, int)> GenerateSuggestions(int[] scores)
         {
             int[] sortedScores = PlayerScore.CountScores(scores);
             List<(string propName, int score)> suggestions = new List<(string, int)>();
             foreach (string propName in Properties)
             {
-                string[] path = propName.Split('.');
-                object? source = GetObject(CurrentPlayerScore.VMScoreboard, path);
-
-                // Now we have the object holding the property
-                // Now set the property to the new value
-                Type? t = source?.GetType();
-                PropertyInfo? propInfo = t?.GetProperty(propName);
-
-                if (propInfo == null || propInfo.GetValue(source, null) != null)
+                (string propName, int score) tuple = GenerateSuggestion(sortedScores, propName);
+                if (tuple.score > 0)
                 {
-                    continue;
-                }
-
-                int score = CalculateScore(propName, sortedScores, propName);
-                if (score > 0)
-                {
-                    suggestions.Add((propName, score));
+                    suggestions.Add(tuple);
                 }
             }
             return suggestions;
