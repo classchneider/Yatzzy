@@ -10,7 +10,7 @@ using YatzyRepository;
 
 namespace YatzyRepository.Migrations
 {
-    [DbContext(typeof(Model))]
+    [DbContext(typeof(YatzyModel))]
     partial class ModelModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
@@ -53,6 +53,10 @@ namespace YatzyRepository.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -60,6 +64,8 @@ namespace YatzyRepository.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Players");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Player");
                 });
 
             modelBuilder.Entity("YatzyRepository.PlayerScore", b =>
@@ -146,6 +152,20 @@ namespace YatzyRepository.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Scoreboards");
+                });
+
+            modelBuilder.Entity("YatzyRepository.AIRollPlayer", b =>
+                {
+                    b.HasBaseType("YatzyRepository.Player");
+
+                    b.HasDiscriminator().HasValue("AIRollPlayer");
+                });
+
+            modelBuilder.Entity("YatzyRepository.HumanPlayer", b =>
+                {
+                    b.HasBaseType("YatzyRepository.Player");
+
+                    b.HasDiscriminator().HasValue("HumanPlayer");
                 });
 
             modelBuilder.Entity("YatzyRepository.PlayerScore", b =>

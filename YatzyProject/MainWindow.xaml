@@ -21,6 +21,10 @@
                     <Separator />
                     <MenuItem Header="_Exit" Name="Menu_Exit" Click="Menu_Exit_Click" />
                 </MenuItem>
+                <MenuItem Header="_Debug">
+                    <MenuItem Header="Suggestions" Name="Menu_Suggestions" Click="Menu_Suggestions_Click"/>
+                    <MenuItem Header="Bot Holds" Name="Menu_Holds" Click="Menu_Holds_Click"/>
+                </MenuItem>
             </Menu>
         </DockPanel>
         <Grid Grid.Row="1" x:Name="GameGrid" Background="White">

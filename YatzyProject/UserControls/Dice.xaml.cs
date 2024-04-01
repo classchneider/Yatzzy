@@ -27,10 +27,8 @@ namespace Yatzy.UserControls
             get { return hold; }
             set
             {
-                if (value == false)
-                {
-                    hold = value;
-                }
+                hold = value;
+                Reframe();
             }
         }
         bool rolling = false;
@@ -56,7 +54,7 @@ namespace Yatzy.UserControls
                 return DiceValue;
             }
             rolling = true;
-            int count = random.Next(10,30);
+            int count = random.Next(10, 30);
             int tmpDice = -1;
             for (int i = 0; i < count; i++)
             {

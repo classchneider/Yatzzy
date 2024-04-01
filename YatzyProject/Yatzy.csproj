@@ -30,12 +30,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="UserControls\Dice1.jpg" />
-    <Resource Include="UserControls\Dice2.jpg" />
-    <Resource Include="UserControls\Dice3.jpg" />
-    <Resource Include="UserControls\Dice4.jpg" />
-    <Resource Include="UserControls\Dice5.jpg" />
-    <Resource Include="UserControls\Dice6.jpg" />
+    <Resource Include="UserControls\Images\Dice1.jpg" />
+    <Resource Include="UserControls\Images\Dice2.jpg" />
+    <Resource Include="UserControls\Images\Dice3.jpg" />
+    <Resource Include="UserControls\Images\Dice4.jpg" />
+    <Resource Include="UserControls\Images\Dice5.jpg" />
+    <Resource Include="UserControls\Images\Dice6.jpg" />
   </ItemGroup>
 
 </Project>

@@ -12,14 +12,14 @@ namespace ViewModels
 {
     public class VMGame : INotifyPropertyChanged
     {
-        public VMGame(Game game, Model model)
+        public VMGame(Game game, YatzyModel model)
         {
             this.game = game;
             Model = model;
         }
         private Game game;
 
-        public Model Model { private get; set; }
+        public YatzyModel Model { private get; set; }
 
         private ObservableCollection<VMPlayerScore> playerScores = new ObservableCollection<VMPlayerScore>();
         public ReadOnlyObservableCollection<VMPlayerScore> PlayerScores { get; private set; }
@@ -112,7 +112,7 @@ namespace ViewModels
             playerScores.Clear();
             foreach (PlayerScore playerScore in game.PlayerScores)
             {
-                VMPlayer vmPlayer = new VMPlayer(playerScore.Player);
+                VMPlayer vmPlayer = VMPlayer.CreateVMPlayer(playerScore.Player);
                 VMScoreboard vmScoreboard = new VMScoreboard(playerScore.Scoreboard);
                 VMPlayerScore vmPlayerScore = new VMPlayerScore(vmPlayer, vmScoreboard, playerScore);
                 playerScores.Add(vmPlayerScore);

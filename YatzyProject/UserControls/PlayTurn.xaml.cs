@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ViewModels;
+using YatzyRepository;
 using static ViewModels.VMYatzyGeneral;
 
 namespace Yatzy.UserControls
@@ -31,7 +32,7 @@ namespace Yatzy.UserControls
         private Dice[] Dices { get; set; }
         private CurrentPlayer CurrentPlayer { get; set; }
         private UTurnCounter TurnCounter { get; set; }
-        int RollCount;
+        public int RollCount { private set; get; }
         bool rolling;
 
         public int[] Results
@@ -70,6 +71,20 @@ namespace Yatzy.UserControls
             rolling = false;
         }
 
+        public void SetHold(HoldInfo[] holds)
+        {
+            if (holds == null)
+            {
+                return;
+            }
+
+            for (int i=0; i< holds.Length; i++)
+            {
+                Dices[i].Hold = holds[i].Hold;
+                Dices[i].CanHold = holds[i].CanHold;
+            }
+        }
+
         public void ResetDices(bool enable = true)
         {
             foreach (Dice d in Dices)
@@ -91,10 +106,14 @@ namespace Yatzy.UserControls
         {
             btn_Roll.IsEnabled = RollCount < 3 && enable;
             btn_Select.IsEnabled = RollCount > 0 && enable;
+            //StateChange(GameStates.Rolling);
         }
 
         private async void Roll()
         {
+            EnableButtons(false);
+            
+
             // Abort if already rolling or after 3 rolls.
             if (RollCount > 2 || rolling)
             {
@@ -102,18 +121,20 @@ namespace Yatzy.UserControls
             }
             rolling = true;
             RollCount++;
-            Task d1 = Dice1.RollDice();
-            Task d2 = Dice2.RollDice();
-            Task d3 = Dice3.RollDice();
-            Task d4 = Dice4.RollDice();
-            Task d5 = Dice5.RollDice();
-            await Task.WhenAll(new Task[] { d1, d2, d3, d4, d5 });
+            Task[] tasks = new Task[Dices.Length];
+            for (int i=0; i< Dices.Length; i++)
+            {
+                tasks[i] = Dices[i].RollDice();
+            }
+            await Task.WhenAll(tasks);
+
             foreach (Dice d in Dices)
             {
                 d.CanHold = true;
             }
             EnableButtons();
             rolling = false;
+            StateChange(GameStates.AfterRoll);
         }
 
         private async void btn_Roll_Click(object sender, RoutedEventArgs e)
@@ -124,6 +145,11 @@ namespace Yatzy.UserControls
         private void btn_Select_Click(object sender, RoutedEventArgs e)
         {
             StateChange(GameStates.SelectScore);
+        }
+
+        private void ShowScorePossibilities()
+        {
+
         }
     }
 }

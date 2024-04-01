@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -100,7 +102,6 @@ namespace Yatzy.UserControls
         {
             dg_ScoreBoard.UnselectAllCells();
             dg_ScoreBoard.SelectedItem = viewModel.CurrentPlayerScore;
-            //SortScoreBoard();
             dg_ScoreBoard.Items.Refresh();
         }
 
@@ -125,7 +126,7 @@ namespace Yatzy.UserControls
 
         private void dg_ScoreBoard_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
         {
-            if (e.AddedCells.Count == 0)
+            if (e.AddedCells.Count == 0 || viewModel.IsGameOver)
             {
                 return;
             }
@@ -141,6 +142,76 @@ namespace Yatzy.UserControls
         {
             dg_ScoreBoard.UnselectAllCells();
             dg_ScoreBoard.SelectedItem = playerScore;
+        }
+
+        static T GetVisualChild<T>(Visual parent) where T : Visual
+        {
+            T child = default(T);
+            int numVisuals = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < numVisuals; i++)
+            {
+                Visual v = (Visual)VisualTreeHelper.GetChild(parent, i);
+                child = v as T;
+                if (child == null)
+                {
+                    child = GetVisualChild<T>(v);
+                }
+                if (child != null)
+                {
+                    break;
+                }
+            }
+            return child;
+        }
+        private DataGridCell GetCell(int rowIndex, int columnIndex)
+        {
+            DataGridRow row = dg_ScoreBoard.ItemContainerGenerator.ContainerFromIndex(rowIndex) as DataGridRow;
+            if (row == null)
+            {
+                dg_ScoreBoard.UpdateLayout();
+                dg_ScoreBoard.ScrollIntoView(dg_ScoreBoard.Items[rowIndex]);
+                row = dg_ScoreBoard.ItemContainerGenerator.ContainerFromIndex(rowIndex) as DataGridRow;
+            }
+            DataGridCellsPresenter p = GetVisualChild<DataGridCellsPresenter>(row);
+            DataGridCell cell = p.ItemContainerGenerator.ContainerFromIndex(columnIndex) as DataGridCell;
+            return cell;
+        }
+        private DataGridCell GetCell(int rowIndex, DataGridColumn column)
+        {
+            return GetCell(rowIndex, column.DisplayIndex);
+        }
+
+        public void MarkScoreSuggestions(List<(string property, int value)> suggestions)
+        {
+            ResetSuggestions();
+            foreach (var suggestion in suggestions)
+            {
+                // Mark the field binded to this property as suggestion
+
+                // Find the field binded to this property
+                //dg_ScoreBoard.SelectedCells[0].Column.Header.ToString();
+
+                int rowIndex = viewModel.GetCurrentPlayerIndex();
+                if (rowIndex >= 0)
+                {
+                    foreach (var column in dg_ScoreBoard.Columns)
+                    {
+                        if (IsColumnBindedToPath(column, $"{nameof(VMScoreboard)}.{suggestion.property}"))
+                        {
+
+                            DataGridCell cell = GetCell(rowIndex, column);
+                            cell.Background = Brushes.Green;
+                            cell.Content = suggestion.value;
+                        }
+                    }
+                }
+            }
+        }
+
+        public void ResetSuggestions()
+        {
+            dg_ScoreBoard.UnselectAllCells();
+            dg_ScoreBoard.Items.Refresh();
         }
     }
 }

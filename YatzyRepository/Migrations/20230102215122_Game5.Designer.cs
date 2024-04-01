@@ -11,7 +11,7 @@ using YatzyRepository;
 
 namespace YatzyRepository.Migrations
 {
-    [DbContext(typeof(Model))]
+    [DbContext(typeof(YatzyModel))]
     [Migration("20230102215122_Game5")]
     partial class Game5
     {

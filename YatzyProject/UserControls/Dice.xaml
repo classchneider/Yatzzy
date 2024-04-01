@@ -9,11 +9,11 @@
              Width="80"
              d:DesignHeight="110" d:DesignWidth="110">
     <Grid x:Name="grid_Dice" MouseUp="grid_Dice_MouseUp">
-        <Image x:Name="img_Dice1" HorizontalAlignment="Left" Margin="10,10,10,10" VerticalAlignment="Bottom" Source="/UserControls/Dice1.jpg"/>
-        <Image x:Name="img_Dice2" HorizontalAlignment="Left" Margin="10,10,10,10" VerticalAlignment="Bottom" Source="/UserControls/Dice2.jpg"/>
-        <Image x:Name="img_Dice3" HorizontalAlignment="Left" Margin="10,10,10,10" VerticalAlignment="Bottom" Source="/UserControls/Dice3.jpg"/>
-        <Image x:Name="img_Dice4" HorizontalAlignment="Left" Margin="10,10,10,10" VerticalAlignment="Bottom" Source="/UserControls/Dice4.jpg"/>
-        <Image x:Name="img_Dice5" HorizontalAlignment="Left" Margin="10,10,10,10" VerticalAlignment="Bottom" Source="/UserControls/Dice5.jpg"/>
-        <Image x:Name="img_Dice6" HorizontalAlignment="Left" Margin="10,10,10,10" VerticalAlignment="Bottom" Source="/UserControls/Dice6.jpg"/>
+        <Image x:Name="img_Dice1" HorizontalAlignment="Left" Margin="10,10,10,10" VerticalAlignment="Bottom" Source="/UserControls/Images/Dice1.jpg"/>
+        <Image x:Name="img_Dice2" HorizontalAlignment="Left" Margin="10,10,10,10" VerticalAlignment="Bottom" Source="/UserControls/Images/Dice2.jpg"/>
+        <Image x:Name="img_Dice3" HorizontalAlignment="Left" Margin="10,10,10,10" VerticalAlignment="Bottom" Source="/UserControls/Images/Dice3.jpg"/>
+        <Image x:Name="img_Dice4" HorizontalAlignment="Left" Margin="10,10,10,10" VerticalAlignment="Bottom" Source="/UserControls/Images/Dice4.jpg"/>
+        <Image x:Name="img_Dice5" HorizontalAlignment="Left" Margin="10,10,10,10" VerticalAlignment="Bottom" Source="/UserControls/Images/Dice5.jpg"/>
+        <Image x:Name="img_Dice6" HorizontalAlignment="Left" Margin="10,10,10,10" VerticalAlignment="Bottom" Source="/UserControls/Images/Dice6.jpg"/>
     </Grid>
 </UserControl>

@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -65,15 +67,34 @@ namespace Yatzy
             scoreboard.ResetScoreboard();
         }
 
+        public void SelectScore()
+        {
+        }
+
         public void SelectScore(string ColumnName)
         {
             ViewModel.SelectScore(scoreboard.SelectedHeaderPath, turnPlay.Results, ColumnName);
+        }
+
+        public void MakeSuggestions()
+        {
+            scoreboard.MarkScoreSuggestions(ViewModel.GenerateSuggestions(turnPlay.Results));
         }
 
         public bool ConfirmAction(string message, string title)
         {
             MessageBoxResult res = MessageBox.Show(message, title, MessageBoxButton.OKCancel);
             return (res == MessageBoxResult.OK);
+        }
+
+        public void AskPlayerAction()
+        {
+            turnPlay.SetHold(ViewModel.Holds(turnPlay.Results, turnPlay.RollCount));
+
+            if (turnPlay.RollCount == 3)
+            {
+                ViewModel.SelectScore(turnPlay.Results, turnPlay.RollCount);
+            }
         }
 
         public void ViewChangeState(GameStates state)
@@ -88,11 +109,18 @@ namespace Yatzy
                     case GameStates.SelectScore:
                         SelectScore(scoreboard.SelectedCellName);
                         break;
+                    case GameStates.Rolling:
+                        scoreboard.ResetSuggestions();
+                        break;
+                    case GameStates.AfterRoll:
+                        MakeSuggestions();
+                        AskPlayerAction();
+                        break;
                     case GameStates.NewTurn:
                         Reset();
                         break;
                     case GameStates.EndGame:
-                        Reset(); 
+                        Reset();
                         scoreboard.SelectPlayer(ViewModel.LeadingPlayer);
                         break;
                     case GameStates.SetupGame:
@@ -118,6 +146,16 @@ namespace Yatzy
         private void Menu_Exit_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void Menu_Suggestions_Click(object sender, RoutedEventArgs e)
+        {
+            MakeSuggestions();
+        }
+
+        private void Menu_Holds_Click(object sender, RoutedEventArgs e)
+        {
+            AskPlayerAction();
         }
     }
 }

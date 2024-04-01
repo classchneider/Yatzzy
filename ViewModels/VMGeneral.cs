@@ -1,8 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Reflection;
 using YatzyRepository;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace ViewModels
 {
@@ -16,7 +18,7 @@ namespace ViewModels
             _VMGames = new ReadOnlyObservableCollection<VMGame>(games);
         }
 
-        public enum GameStates { SetupGame, RunGame, SelectScore, NewTurn, EndGame };
+        public enum GameStates { SetupGame, RunGame, Rolling, AfterRoll, SelectScore, NewTurn, EndGame };
 
         GameStates gameState;
         public GameStates GameState
@@ -40,7 +42,7 @@ namespace ViewModels
         {
             foreach (Player p in Model.Players)
             {
-                VMPlayer player = new VMPlayer(p);
+                VMPlayer player = VMPlayer.CreateVMPlayer(p);
                 players.Add(player);
             }
         }
@@ -101,6 +103,7 @@ namespace ViewModels
             return game;
         }
 
+
         public ReadOnlyObservableCollection<VMGame> Games
         {
             get
@@ -137,7 +140,12 @@ namespace ViewModels
         {
             get
             {
-                if (CurrentGame?.NextPlayerScoreIndex >= 0 && CurrentGame?.NextPlayerScoreIndex < CurrentGame?.PlayerScores.Count)
+                if (IsGameOver)
+                {
+                    RaisePropertyChanged(nameof(PlayerText));
+                    return LeadingPlayer;
+                }
+                else if (CurrentGame?.NextPlayerScoreIndex >= 0 && CurrentGame?.NextPlayerScoreIndex < CurrentGame?.PlayerScores.Count)
                 {
                     return CurrentGame?.PlayerScores[CurrentGame.NextPlayerScoreIndex];
                 }
@@ -148,12 +156,48 @@ namespace ViewModels
             }
         }
 
+        public HoldInfo[]? Holds(int[] Results, int diceCount)
+        {
+            return CurrentPlayerScore.Holds(Results, GenerateSuggestions(Results), diceCount);
+        }
+
+        public void SelectScore(int[] Results, int diceCount)
+        {
+            PropertyInfo propertyInfo = CurrentPlayerScore.SelectScore(GenerateSuggestions(Results), Results, diceCount);
+
+            if (propertyInfo != null)
+            {
+                SelectScore(propertyInfo, Results);
+            }
+        }
+        public int GetCurrentPlayerIndex()
+        {
+            return CurrentGame.NextPlayerScoreIndex;
+        }
+
         public VMPlayer? CurrentPlayer => CurrentPlayerScore?.VMPlayer;
 
-        private Model Model { get; set; } = new Model();
+        public string PlayerText
+        {
+            get
+            {
+                if (IsGameOver)
+                {
+                    return "Vinder:";
+                }
+                else
+                {
+                    return "";
+                }
+            }
+        }
+
+
+        private YatzyModel Model { get; set; } = new YatzyModel();
 
         // delegates
         public delegate void StateChangeMethod(GameStates state);
+        public delegate List<(string property, int score)> SuggestionsMethod();
         public delegate bool ConfirmMethod(string question, string title = "Bekræft handling");
 
         public StateChangeMethod? UIStateChange { private get; set; }
@@ -201,7 +245,7 @@ namespace ViewModels
         {
             get
             {
-                if (CurrentGame == null || CurrentGame.CurrentPlayerIsGameOver)
+                if (CurrentGame == null || CurrentGame.NextPlayerScoreIndex == 0 && CurrentGame.CurrentPlayerIsGameOver)
                 {
                     return true;
                 }
@@ -217,7 +261,6 @@ namespace ViewModels
 
             GameState = state;
 
-
             switch (GameState)
             {
                 case GameStates.RunGame:
@@ -229,6 +272,8 @@ namespace ViewModels
                         GameState = GameStates.EndGame;
                     }
                     break;
+                case GameStates.EndGame:
+                    break;
                 case GameStates.SetupGame:
                     // No action, all is handled in View
                     break;
@@ -236,6 +281,7 @@ namespace ViewModels
 
             // Let UI reflect state change
             UIStateChange?.Invoke(GameState);
+
         }
 
         public VMPlayerScore? LeadingPlayer
@@ -248,11 +294,27 @@ namespace ViewModels
 
         public VMPlayer CreatePlayer(string name)
         {
-            Player player = new Player()
+            Player player = new HumanPlayer()
             {
                 Name = name,
             };
-            VMPlayer vmPlayer = new VMPlayer(player);
+
+            return AddViewModelAndGame(player);
+        }
+
+        public VMPlayer CreateAIRollPlayer(string name)
+        {
+            Player player = new AIRollPlayer()
+            {
+                Name = name,
+            };
+
+            return AddViewModelAndGame(player);
+        }
+
+        private VMPlayer AddViewModelAndGame(Player player)
+        {
+            VMPlayer vmPlayer = VMPlayer.CreateVMPlayer(player);
 
             // Add to ViewModel
             players.Add(vmPlayer);
@@ -293,6 +355,10 @@ namespace ViewModels
         public void PlayGame(string gameName)
         {
             StateChange(GameStates.RunGame);
+            if (IsGameOver)
+            {
+                StateChange(GameStates.EndGame);
+            }
         }
 
         public VMGame CreateGame(string name)
@@ -307,7 +373,7 @@ namespace ViewModels
             Model.SaveChanges();
             RaisePropertyChanged(nameof(Games));
             RaisePropertyChanged(nameof(ActiveGames));
-            
+
             return vmGame;
         }
 
@@ -317,6 +383,34 @@ namespace ViewModels
             game.LoadPlayerScores();
 
             RaisePropertyChanged(nameof(CurrentGame));
+        }
+
+        public void SelectScore(PropertyInfo propInfo, int[] scores)
+        {
+            SelectScore(propInfo, scores, CurrentPlayerScore.VMScoreboard, propInfo.Name, true);
+        }
+
+        private void SelectScore(PropertyInfo propInfo, int[] scores, object source, string columnName, bool silent = false)
+        {
+            int[] sortedScores = PlayerScore.CountScores(scores);
+
+            int score = CalculateScore(propInfo.Name, sortedScores, columnName);
+            if (!silent && (UIConfirm == null || UIConfirm($"Gem {score} points i {columnName}?")))
+            {
+                propInfo.SetValue(source, score, null);
+                Model.SaveChanges();
+
+                // Notify property change
+                (source as VMScoreboard)?.RaisePropertyChanged(propInfo.Name);
+                (source as VMScoreboard)?.RaisePropertyChanged(nameof(VMScoreboard.Sum));
+                (source as VMScoreboard)?.RaisePropertyChanged(nameof(VMScoreboard.Bonus));
+                (source as VMScoreboard)?.RaisePropertyChanged(nameof(VMScoreboard.SumEvalueate));
+                (source as VMScoreboard)?.RaisePropertyChanged(nameof(VMScoreboard.Sum2));
+
+                // Now change state
+                StateChange(GameStates.NewTurn);
+            }
+
         }
 
         public void SelectScore(string path, int[] scores, string columnName)
@@ -341,107 +435,133 @@ namespace ViewModels
                 }
             }
 
-            int score = CalculateScore(propInfo.Name, scores, columnName);
-            if (UIConfirm == null || UIConfirm($"Gem {score} points i {columnName}?"))
-            {
-                propInfo.SetValue(source, score, null);
-                Model.SaveChanges();
-
-                // Notify property change
-                (source as VMScoreboard)?.RaisePropertyChanged(propInfo.Name);
-                (source as VMScoreboard)?.RaisePropertyChanged(nameof(VMScoreboard.Sum));
-                (source as VMScoreboard)?.RaisePropertyChanged(nameof(VMScoreboard.Bonus));
-                (source as VMScoreboard)?.RaisePropertyChanged(nameof(VMScoreboard.SumEvalueate));
-                (source as VMScoreboard)?.RaisePropertyChanged(nameof(VMScoreboard.Sum2));
-
-                // Now change state
-                StateChange(GameStates.NewTurn);
-            }
+            SelectScore(propInfo, scores, source, columnName);
         }
 
-
-        private int CalculateScore(string property, int[] scores, string columnName)
+        private int CalculateScore(string property, int[] sortedScores, string columnName)
         {
             if (property == nameof(CurrentPlayerScore.VMScoreboard.Ones))
             {
-                return CalculateNumbers(1, scores);
+                return CalculateNumbers(1, sortedScores);
             }
             else if (property == nameof(CurrentPlayerScore.VMScoreboard.Twos))
             {
-                return CalculateNumbers(2, scores);
+                return CalculateNumbers(2, sortedScores);
             }
             else if (property == nameof(CurrentPlayerScore.VMScoreboard.Threes))
             {
-                return CalculateNumbers(3, scores);
+                return CalculateNumbers(3, sortedScores);
             }
             else if (property == nameof(CurrentPlayerScore.VMScoreboard.Fours))
             {
-                return CalculateNumbers(4, scores);
+                return CalculateNumbers(4, sortedScores);
             }
             else if (property == nameof(CurrentPlayerScore.VMScoreboard.Fives))
             {
-                return CalculateNumbers(5, scores);
+                return CalculateNumbers(5, sortedScores);
             }
             else if (property == nameof(CurrentPlayerScore.VMScoreboard.Sixes))
             {
-                return CalculateNumbers(6, scores);
+                return CalculateNumbers(6, sortedScores);
             }
             else if (property == nameof(CurrentPlayerScore.VMScoreboard.Pair))
             {
-                return CalculateSame(2, scores);
+                return CalculateSame(2, sortedScores);
             }
             else if (property == nameof(CurrentPlayerScore.VMScoreboard.TwoPairs))
             {
-                return CalculateTwoPairs(scores);
+                return CalculateTwoPairs(sortedScores);
             }
             else if (property == nameof(CurrentPlayerScore.VMScoreboard.ThreeSame))
             {
-                return CalculateSame(3, scores);
+                return CalculateSame(3, sortedScores);
             }
             else if (property == nameof(CurrentPlayerScore.VMScoreboard.FourSame))
             {
-                return CalculateSame(4, scores);
+                return CalculateSame(4, sortedScores);
             }
             else if (property == nameof(CurrentPlayerScore.VMScoreboard.LittleStraight))
             {
-                return CalculateLittleStraight(scores);
+                return CalculateLittleStraight(sortedScores);
             }
             else if (property == nameof(CurrentPlayerScore.VMScoreboard.GreatStraight))
             {
-                return CalculateGreatStraight(scores);
+                return CalculateGreatStraight(sortedScores);
             }
             else if (property == nameof(CurrentPlayerScore.VMScoreboard.House))
             {
-                return CalculateHouse(scores);
+                return CalculateHouse(sortedScores);
             }
             else if (property == nameof(CurrentPlayerScore.VMScoreboard.Chance))
             {
-                return CalculateChance(scores);
+                return CalculateChance(sortedScores);
             }
             else if (property == nameof(CurrentPlayerScore.VMScoreboard.Yatzy))
             {
-                return CalculateYatzy(scores);
+                return CalculateYatzy(sortedScores);
             }
 
             throw new ArgumentException($"Ukendt kolonne '{columnName}'");
         }
 
-        private int[] CountScores(int[] scores)
+        List<string> Properties
         {
-            int[] candidates = new int[] { 0, 0, 0, 0, 0, 0 };
-            foreach (int roll in scores)
+            get
             {
-                candidates[roll - 1]++;
+                return new List<string>
+                {
+                    nameof(CurrentPlayerScore.VMScoreboard.Ones),
+                    nameof(CurrentPlayerScore.VMScoreboard.Twos),
+                    nameof(CurrentPlayerScore.VMScoreboard.Threes),
+                    nameof(CurrentPlayerScore.VMScoreboard.Fours),
+                    nameof(CurrentPlayerScore.VMScoreboard.Fives),
+                    nameof(CurrentPlayerScore.VMScoreboard.Sixes),
+                    nameof(CurrentPlayerScore.VMScoreboard.Pair),
+                    nameof(CurrentPlayerScore.VMScoreboard.TwoPairs),
+                    nameof(CurrentPlayerScore.VMScoreboard.ThreeSame),
+                    nameof(CurrentPlayerScore.VMScoreboard.FourSame),
+                    nameof(CurrentPlayerScore.VMScoreboard.LittleStraight),
+                    nameof(CurrentPlayerScore.VMScoreboard.GreatStraight),
+                    nameof(CurrentPlayerScore.VMScoreboard.House),
+                    nameof(CurrentPlayerScore.VMScoreboard.Chance),
+                    nameof(CurrentPlayerScore.VMScoreboard.Yatzy)
+                };
             }
-            return candidates;
         }
 
-        private int CalculateSame(int count, int[] scores)
+        public List<(string, int)> GenerateSuggestions(int[] scores)
         {
-            int[] candidates = CountScores(scores);
-            for (int i = candidates.Length - 1; i >= 0; i--)
+            int[] sortedScores = PlayerScore.CountScores(scores);
+            List<(string propName, int score)> suggestions = new List<(string, int)>();
+            foreach (string propName in Properties)
             {
-                if (candidates[i] >= count)
+                string[] path = propName.Split('.');
+                object? source = GetObject(CurrentPlayerScore.VMScoreboard, path);
+
+                // Now we have the object holding the property
+                // Now set the property to the new value
+                Type? t = source?.GetType();
+                PropertyInfo? propInfo = t?.GetProperty(propName);
+
+                if (propInfo == null || propInfo.GetValue(source, null) != null)
+                {
+                    continue;
+                }
+
+                int score = CalculateScore(propName, sortedScores, propName);
+                if (score > 0)
+                {
+                    suggestions.Add((propName, score));
+                }
+            }
+            return suggestions;
+        }
+
+        private int CalculateSame(int count, int[] sortedScores)
+        {
+            for (int i = sortedScores.Length - 1; i >= 0; i--)
+            {
+                if (sortedScores[i] >= count)
                 {
                     return (i + 1) * count;
                 }
@@ -449,73 +569,75 @@ namespace ViewModels
             return 0;
         }
 
-        private int CalculateLittleStraight(int[] scores)
+        private int CalculateLittleStraight(int[] sortedScores)
         {
-            int[] candidates = CountScores(scores);
+            int localSum = 0;
             for (int i = 0; i < 5; i++)
             {
-                if (candidates[i] != 1)
+                if (sortedScores[i] != 1)
                 {
                     return 0;
                 }
+                else
+                {
+                    localSum += i + 1;
+                }
             }
-            return scores.Sum();
+            return localSum;
         }
 
-        private int CalculateGreatStraight(int[] scores)
+        private int CalculateGreatStraight(int[] sortedScores)
         {
-            int[] candidates = CountScores(scores);
+            int localSum = 0;
             for (int i = 1; i < 6; i++)
             {
-                if (candidates[i] != 1)
+                if (sortedScores[i] != 1)
                 {
                     return 0;
                 }
-            }
-            return scores.Sum();
-        }
-
-        private int CalculateChance(int[] scores)
-        {
-            int score = 0;
-            foreach (int s in scores)
-            {
-                score += s;
-            }
-            return score;
-        }
-
-        private int CalculateYatzy(int[] scores)
-        {
-            int candidate = -1;
-            foreach (int s in scores)
-            {
-                if (candidate < 0)
+                else
                 {
-                    candidate = s;
-                }
-                else if (candidate != s)
-                {
-                    return 0;
+                    localSum += i + 1;
                 }
             }
-            return 50;
+            return localSum;
         }
 
-        private int CalculateHouse(int[] scores)
+        private int CalculateChance(int[] scortedSores)
         {
-            int[] candidates = CountScores(scores);
+            int localSum = 0;
+            for (int i = 0; i < scortedSores.Length; i++)
+            {
+                localSum += (i + 1) * scortedSores[i];
+            }
+            return localSum;
+        }
+
+        private int CalculateYatzy(int[] sortedScores)
+        {
+            for (int i = 0; i < sortedScores.Length; i++)
+            {
+                if (sortedScores[i] == 5)
+                {
+                    return 50;
+                }
+            }
+            return 0;
+        }
+
+        private int CalculateHouse(int[] sortedScores)
+        {
             int score = 0;
             bool three = false;
             bool two = false;
-            for (int i = candidates.Length - 1; i >= 0; i--)
+            for (int i = sortedScores.Length - 1; i >= 0; i--)
             {
-                if (candidates[i] == 3)
+                if (sortedScores[i] == 3)
                 {
                     score += (i + 1) * 3;
                     three = true;
                 }
-                else if (candidates[i] == 2)
+                else if (sortedScores[i] == 2)
                 {
                     score += (i + 1) * 2;
                     two = true;
@@ -531,14 +653,13 @@ namespace ViewModels
             }
         }
 
-        private int CalculateTwoPairs(int[] scores)
+        private int CalculateTwoPairs(int[] sortedScores)
         {
-            int[] candidates = CountScores(scores);
             int score = 0;
             int pairCount = 0;
-            for (int i = candidates.Length - 1; i >= 0; i--)
+            for (int i = sortedScores.Length - 1; i >= 0; i--)
             {
-                if (candidates[i] >= 2)
+                if (sortedScores[i] >= 2)
                 {
                     score += (i + 1) * 2;
                     pairCount++;
@@ -559,17 +680,9 @@ namespace ViewModels
         }
 
         // Calculate points for 1'es,2'es, ... 6'es
-        private int CalculateNumbers(int number, int[] scores)
+        private int CalculateNumbers(int number, int[] sortedScores)
         {
-            int score = 0;
-            foreach (int s in scores)
-            {
-                if (s == number)
-                {
-                    score += s;
-                }
-            }
-            return score;
+            return sortedScores[number - 1] * number;
         }
 
         private object? GetObject(object? instance, string[] path)
@@ -597,9 +710,9 @@ namespace ViewModels
         {
             players.Clear();
             VMPlayer player;
-            player = CreatePlayer("Peter Plys");
-            player = CreatePlayer("Grisling");
-            player = CreatePlayer("Ninka");
+            player = CreateAIRollPlayer("Peter Plys");
+            player = CreateAIRollPlayer("Grisling");
+            player = CreateAIRollPlayer("Ninka");
             Model.SaveChanges();
         }
     }

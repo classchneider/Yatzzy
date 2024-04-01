@@ -60,39 +60,7 @@ namespace ViewModels
         {
             get
             {
-                int par = 0;
-                int score = 0;
-                if (Ones != null)
-                {
-                    par += 3 * 1;
-                    score += Ones.Value;
-                }
-                if (Twos != null)
-                {
-                    par += 3 * 2;
-                    score += Twos.Value;
-                }
-                if (Threes != null)
-                {
-                    par += 3 * 3;
-                    score += Threes.Value;
-                }
-                if (Fours != null)
-                {
-                    par += 3 * 4;
-                    score += Fours.Value;
-                }
-                if (Fives != null)
-                {
-                    par += 3 * 5;
-                    score += Fives.Value;
-                }
-                if (Sixes != null)
-                {
-                    par += 3 * 6;
-                    score += Sixes.Value;
-                }
-                return score - par;
+                return Scoreboard.BonusStatus;
             }
         }
 
