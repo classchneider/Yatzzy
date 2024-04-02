@@ -22,6 +22,7 @@ namespace YatzyRepository
         public int Needed;
         public int Score;
         public double CombinedScore;
+        public int HoldDice;
 
         public int CompareTo(object? obj)
         {
@@ -38,7 +39,7 @@ namespace YatzyRepository
 
         public override string ToString()
         {
-            return $"{nameof(Property)}: {Property} | {nameof(Missing)}: {Missing} | {nameof(Score)}: {Score} | {nameof(CombinedScore)}: {CombinedScore}";
+            return $"{nameof(Property)}: {Property} | {nameof(Missing)}: {Missing} | {nameof(HoldDice)}: {HoldDice} | {nameof(Score)}: {Score} | {nameof(CombinedScore)}: {CombinedScore}";
         }
     }
 

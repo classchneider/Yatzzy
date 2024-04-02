@@ -78,7 +78,8 @@ namespace Yatzy.UserControls
                 return;
             }
 
-            btn_Select.IsEnabled = ButtonsAvailable;
+            EnableButtons(ButtonsAvailable);
+
             for (int i=0; i< holds.Length; i++)
             {
                 Dices[i].Hold = holds[i].Hold;
@@ -96,6 +97,7 @@ namespace Yatzy.UserControls
             }
             RollCount = 0;
             EnableButtons(enable);
+            UpdateRollsText();
         }
 
         public void SortPlayers()
@@ -103,11 +105,15 @@ namespace Yatzy.UserControls
             TurnCounter.SortPlayers();
         }
 
-        private void EnableButtons(bool enable = true)
+        public void EnableButtons(bool enable = true)
         {
             btn_Roll.IsEnabled = RollCount < 3 && enable;
             btn_Select.IsEnabled = RollCount > 0 && enable;
-            //StateChange(GameStates.Rolling);
+        }
+
+        private void UpdateRollsText()
+        {
+            tb_RollCount.Text = RollCount.ToString();
         }
 
         private async void Roll()
@@ -133,9 +139,16 @@ namespace Yatzy.UserControls
             {
                 d.CanHold = true;
             }
-            EnableButtons();
+            //EnableButtons();
             rolling = false;
             StateChange(GameStates.AfterRoll);
+
+            UpdateRollsText();
+        }
+
+        public async void ActivateRoll()
+        {
+            Roll();
         }
 
         private async void btn_Roll_Click(object sender, RoutedEventArgs e)

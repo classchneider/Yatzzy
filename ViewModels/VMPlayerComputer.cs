@@ -257,7 +257,8 @@ namespace ViewModels
                         Property = nameof(Scoreboard.Sixes),
                         Missing = 3 - sortedScores[5],
                         Needed = 3,
-                        Score = points
+                        Score = points,
+                        HoldDice = 6,
                     }
                 );
             }
@@ -271,7 +272,8 @@ namespace ViewModels
                         Property = nameof(Scoreboard.Fives),
                         Missing = 3 - sortedScores[4],
                         Needed = 3,
-                        Score = points
+                        Score = points,
+                        HoldDice = 5,
                     }
                 );
             }
@@ -285,37 +287,46 @@ namespace ViewModels
                         Property = nameof(Scoreboard.Fours),
                         Missing = 3 - sortedScores[3],
                         Needed = 3,
-                        Score = points
+                        Score = points,
+                        HoldDice = 4,
                     }
                 );
             }
             if (!Scoreboard.FourSame.HasValue)
             {
-                int points = AIPointsDirectLocal((nameof(Scoreboard.FourSame), (MostOccurencesIndex + 1) * 4));
+                for (int i = 0; i < sortedScores.Length; i++)
+                {
+                    int points = AIPointsDirectLocal((nameof(Scoreboard.FourSame), (i + 1) * 4));
 
-                missingDices.Add(
-                    new DiceCandidate
-                    {
-                        Property = nameof(Scoreboard.FourSame),
-                        Missing = 4 - sortedScores[MostOccurencesIndex],
-                        Needed = 4,
-                        Score = points
-                    }
-                );
+                    missingDices.Add(
+                        new DiceCandidate
+                        {
+                            Property = nameof(Scoreboard.FourSame),
+                            Missing = 4 - sortedScores[i],
+                            Needed = 4,
+                            Score = points,
+                            HoldDice = i+1,
+                        }
+                    );
+                }
             }
             if (!Scoreboard.ThreeSame.HasValue)
             {
-                int points = AIPointsDirectLocal((nameof(Scoreboard.ThreeSame), (MostOccurencesIndex + 1) * 3));
+                for (int i = 0; i < sortedScores.Length; i++)
+                {
+                    int points = AIPointsDirectLocal((nameof(Scoreboard.ThreeSame), (i + 1) * 3));
 
-                missingDices.Add(
-                    new DiceCandidate
-                    {
-                        Property = nameof(Scoreboard.ThreeSame),
-                        Missing = 3 - sortedScores[MostOccurencesIndex],
-                        Needed = 3,
-                        Score = points
-                    }
-                );
+                    missingDices.Add(
+                        new DiceCandidate
+                        {
+                            Property = nameof(Scoreboard.ThreeSame),
+                            Missing = 3 - sortedScores[i],
+                            Needed = 3,
+                            Score = points,
+                            HoldDice = i+1,
+                        }
+                    );
+                }
             }
             if (!Scoreboard.House.HasValue)
             {
@@ -323,7 +334,7 @@ namespace ViewModels
 
                 int ThreeOfAKind = 0;
                 int TwoOfAKind = 0;
-                for (int i = 0; i< sortedScores.Length; i++)
+                for (int i = 0; i < sortedScores.Length; i++)
                 {
                     if (sortedScores[i] >= 3)
                     {
@@ -359,7 +370,8 @@ namespace ViewModels
                         Property = nameof(Scoreboard.House),
                         Missing = 5 - ThreeOfAKind - TwoOfAKind,
                         Needed = 5,
-                        Score = points
+                        Score = points,
+                        HoldDice = -1,
                     }
                 );
             }
@@ -373,7 +385,8 @@ namespace ViewModels
                         Property = nameof(Scoreboard.Yatzy),
                         Missing = 5 - sortedScores[MostOccurencesIndex],
                         Needed = 5,
-                        Score = points
+                        Score = points,
+                        HoldDice = MostOccurencesIndex+1,
                     }
                 );
             }
@@ -387,7 +400,8 @@ namespace ViewModels
                         Property = nameof(Scoreboard.Threes),
                         Missing = 3 - sortedScores[2],
                         Needed = 3,
-                        Score = points
+                        Score = points,
+                        HoldDice = 3,
                     }
                 );
             }
@@ -423,7 +437,8 @@ namespace ViewModels
                         Property = nameof(Scoreboard.TwoPairs),
                         Missing = missing,
                         Needed = 4,
-                        Score = points
+                        Score = points,
+                        HoldDice = -1,
                     }
                 );
             }
@@ -437,7 +452,8 @@ namespace ViewModels
                         Property = nameof(Scoreboard.Twos),
                         Missing = 3 - sortedScores[1],
                         Needed = 3,
-                        Score = points
+                        Score = points,
+                        HoldDice = 2,
                     }
                 );
             }
@@ -451,7 +467,8 @@ namespace ViewModels
                         Property = nameof(Scoreboard.Ones),
                         Missing = 3 - sortedScores[0],
                         Needed = 3,
-                        Score = points
+                        Score = points,
+                        HoldDice = 1,
                     }
                 );
             }
@@ -473,7 +490,8 @@ namespace ViewModels
                         Property = nameof(Scoreboard.GreatStraight),
                         Missing = missing,
                         Needed = 5,
-                        Score = points
+                        Score = points,
+                        HoldDice = -1,
                     }
                 );
             }
@@ -496,37 +514,28 @@ namespace ViewModels
                         Property = nameof(Scoreboard.LittleStraight),
                         Missing = missing,
                         Needed = 5,
-                        Score = points
+                        Score = points,
+                        HoldDice = -1,
                     }
                 );
             }
             if (!Scoreboard.Pair.HasValue)
             {
-                // Select the largest number of equal dices
-                int missing = 1;
-                int largest = 1;
-                for (int i = sortedScores.Length - 1; i >= 0; i--)
+                for (int i = 0; i < sortedScores.Length; i++)
                 {
-                    // First (largest) pair found
-                    if (sortedScores[i] >= 2)
-                    {
-                        missing = 0;
-                        largest = i + 1;
-                        break;
-                    }
+                    int points = AIPointsDirectLocal((nameof(Scoreboard.Pair), (i + 1) * 3));
+
+                    missingDices.Add(
+                        new DiceCandidate
+                        {
+                            Property = nameof(Scoreboard.Pair),
+                            Missing = 2 - sortedScores[i],
+                            Needed = 2,
+                            Score = points,
+                            HoldDice = i + 1,
+                        }
+                    );
                 }
-
-                int points = AIPointsDirectLocal((nameof(Scoreboard.Pair), largest * 2));
-
-                missingDices.Add(
-                    new DiceCandidate
-                    {
-                        Property = nameof(Scoreboard.Pair),
-                        Missing = missing,
-                        Needed = 2,
-                        Score = points
-                    }
-                );
             }
             if (!Scoreboard.Chance.HasValue)
             {
@@ -539,7 +548,8 @@ namespace ViewModels
                         Property = nameof(Scoreboard.Chance),
                         Missing = (30 - score) / 4,
                         Needed = 5,
-                        Score = points
+                        Score = points,
+                        HoldDice = -1,
                     }
                 );
             }
@@ -547,53 +557,54 @@ namespace ViewModels
             return missingDices;
         }
 
-        HoldInfo[]? HoldAimProperty(string Property, int[] Results, int[] sortedScores, int MostOccurencesIndex)
+        HoldInfo[]? HoldAimProperty(DiceCandidate AimCandidate, int[] Results, int[] sortedScores, int MostOccurencesIndex)
         {
-            if (Property == nameof(Scoreboard.Sixes))
+            int DefaultHoldDice = AimCandidate.HoldDice > 0 ? AimCandidate.HoldDice : MostOccurencesIndex + 1;
+            if (AimCandidate.Property == nameof(Scoreboard.Sixes))
             {
                 return HoldNumbers(Results, 6);
             }
-            if (Property == nameof(Scoreboard.Fives))
+            if (AimCandidate.Property == nameof(Scoreboard.Fives))
             {
                 return HoldNumbers(Results, 5);
             }
-            if (Property == nameof(Scoreboard.Fours))
+            if (AimCandidate.Property == nameof(Scoreboard.Fours))
             {
                 return HoldNumbers(Results, 4);
             }
-            if (Property == nameof(Scoreboard.Threes))
+            if (AimCandidate.Property == nameof(Scoreboard.Threes))
             {
                 return HoldNumbers(Results, 3);
             }
-            if (Property == nameof(Scoreboard.Twos))
+            if (AimCandidate.Property == nameof(Scoreboard.Twos))
             {
                 return HoldNumbers(Results, 2);
             }
-            if (Property == nameof(Scoreboard.Ones))
+            if (AimCandidate.Property == nameof(Scoreboard.Ones))
             {
                 return HoldNumbers(Results, 1);
             }
-            if (Property == nameof(Scoreboard.TwoPairs))
+            if (AimCandidate.Property == nameof(Scoreboard.TwoPairs))
             {
                 return HoldTwoPairs(Results);
             }
-            if (Property == nameof(Scoreboard.Pair))
+            if (AimCandidate.Property == nameof(Scoreboard.Pair))
             {
-                return HoldNumbers(Results, MostOccurencesIndex + 1);
+                return HoldNumbers(Results, DefaultHoldDice);
             }
-            if (Property == nameof(Scoreboard.ThreeSame))
+            if (AimCandidate.Property == nameof(Scoreboard.ThreeSame))
             {
-                return HoldNumbers(Results, MostOccurencesIndex + 1);
+                return HoldNumbers(Results, DefaultHoldDice);
             }
-            if (Property == nameof(Scoreboard.FourSame))
+            if (AimCandidate.Property == nameof(Scoreboard.FourSame))
             {
-                return HoldNumbers(Results, MostOccurencesIndex + 1);
+                return HoldNumbers(Results, DefaultHoldDice);
             }
-            if (Property == nameof(Scoreboard.Yatzy))
+            if (AimCandidate.Property == nameof(Scoreboard.Yatzy))
             {
-                return HoldNumbers(Results, MostOccurencesIndex + 1);
+                return HoldNumbers(Results, DefaultHoldDice);
             }
-            if (Property == nameof(Scoreboard.LittleStraight))
+            if (AimCandidate.Property == nameof(Scoreboard.LittleStraight))
             {
                 HoldInfo[] holdInfos = new HoldInfo[5];
                 // Save one of each 1-5
@@ -609,7 +620,7 @@ namespace ViewModels
                 }
                 return holdInfos;
             }
-            if (Property == nameof(Scoreboard.GreatStraight))
+            if (AimCandidate.Property == nameof(Scoreboard.GreatStraight))
             {
                 HoldInfo[] holdInfos = new HoldInfo[5];
                 // Save one of each 1-5
@@ -625,7 +636,7 @@ namespace ViewModels
                 }
                 return holdInfos;
             }
-            if (Property == nameof(Scoreboard.House))
+            if (AimCandidate.Property == nameof(Scoreboard.House))
             {
                 int MostOccuring = MostOccurencesIndex + 1;
                 int SecondCandidate = -1;
@@ -648,7 +659,7 @@ namespace ViewModels
                 }
                 return HoldHouse(Results, MostOccuring, SecondCandidate);
             }
-            if (Property == nameof(Scoreboard.Chance))
+            if (AimCandidate.Property == nameof(Scoreboard.Chance))
             {
                 return HoldGreaterOrEqual(Results, 4);
             }
@@ -661,7 +672,7 @@ namespace ViewModels
             HoldInfo[]? holdInfo = null;
             if (AimCandidate != null && AimCandidate.CombinedScore >= AcceptValue)
             {
-                holdInfo = HoldAimProperty(AimCandidate.Property, Results, sortedScores, MostOccurencesIndex);
+                holdInfo = HoldAimProperty(AimCandidate, Results, sortedScores, MostOccurencesIndex);
             }
 
             return holdInfo;
@@ -705,7 +716,7 @@ namespace ViewModels
             {
                 return Scoreboard.GetType().GetProperty(property);
             }
-            
+
             int AIPoints(int i)
             {
                 return AIScorePoints(suggestions[i], Scoreboard.BonusStatus, diceCount);
@@ -839,6 +850,7 @@ namespace ViewModels
 
         public override HoldInfo[]? Holds(int[] Results, VMScoreboard Scoreboard, int diceCount)
         {
+            HoldInfo[]? ScoreHold = null;
             int AcceptableAIPoints = 10 - 2 * diceCount;
             int[] sortedScores = PlayerScore.CountScores(Results);
 
@@ -852,13 +864,9 @@ namespace ViewModels
                 }
             }
 
-            // If we already have a good score - hold it.
-            // The score is testet by AIPoints(SomeScoreCandidate) >= AcceptableAIPoints
-            HoldInfo[]? ScoreHold = null;
 
             // If we find out how many dice results are needed for different goals
             // we can decide which to go for.
-            //List<(string property, int missing, int Points)> missingDices = new List<(string, int, int)>();
             List<DiceCandidate> missingDices = CalculateMissingDices(Scoreboard, Results, sortedScores, diceCount, MostOccurencesIndex);
 
             // Now we have to combine the missing with the possible gain to calculate the AI score

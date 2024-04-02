@@ -9,7 +9,12 @@
     <Grid x:Name="TopGrid" Margin="40,40" VerticalAlignment="Top" HorizontalAlignment="Left" Background="White"
               Grid.Row="0">
         <StackPanel Name="TopStack" Orientation="Vertical" VerticalAlignment="Top">
-            <StackPanel Name="TopPanel" VerticalAlignment="Top" Orientation="Horizontal" />
+            <StackPanel x:Name="RollPanel" VerticalAlignment="Top" Orientation="Horizontal" Margin="10" HorizontalAlignment="Right">
+                <TextBlock Margin="10" TextWrapping="Wrap" Text="Rolls: " VerticalAlignment="Top" FontSize="28"/>
+                <TextBlock Name="tb_RollCount" Margin="10" TextWrapping="Wrap" Text=" -" VerticalAlignment="Top" FontSize="28"/>
+            </StackPanel>
+            <StackPanel Name="TopPanel" VerticalAlignment="Top" Orientation="Horizontal">
+            </StackPanel>
             <StackPanel x:Name="BotPanel" VerticalAlignment="Top" Orientation="Horizontal" Margin="10" HorizontalAlignment="Right">
                 <Button Margin="0,0,15,0" x:Name="btn_Roll" Content="Kast" Click="btn_Roll_Click" FontSize="22" BorderThickness="2"></Button>
                 <Button Margin="15,0,0,0" x:Name="btn_Select" Content="Gem" Click="btn_Select_Click" FontSize="22" BorderThickness="2"/>

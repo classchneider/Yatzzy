@@ -71,8 +71,8 @@ namespace Yatzy
 
         private void Reset()
         {
-            turnPlay.ResetDices(!ViewModel.IsGameOver);
             turnPlay.SortPlayers();
+            turnPlay.ResetDices(!ViewModel.IsGameOver);
             scoreboard.ResetScoreboard();
         }
 
@@ -98,13 +98,23 @@ namespace Yatzy
 
             if (hold != null)
             {
+                await Task.Delay(1000);
                 turnPlay.SetHold(hold, false);
 
+                await Task.Delay(2000);
                 if (turnPlay.RollCount == 3)
                 {
-                    Task.Delay(4000);
                     ViewModel.SelectScore(turnPlay.Results, turnPlay.RollCount);
                 }
+                else
+                {
+                    turnPlay.ActivateRoll();
+                    turnPlay.EnableButtons(false);
+                }
+            }
+            else
+            {
+                turnPlay.EnableButtons();
             }
         }
 
