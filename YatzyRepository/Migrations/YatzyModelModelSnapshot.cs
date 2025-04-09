@@ -3,7 +3,6 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using YatzyRepository;
 
@@ -12,10 +11,9 @@ using YatzyRepository;
 namespace YatzyRepository.Migrations
 {
     [DbContext(typeof(YatzyModel))]
-    [Migration("20240312084902_AIPLayer")]
-    partial class AIPLayer
+    partial class YatzyModelModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

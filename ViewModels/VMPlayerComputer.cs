@@ -710,7 +710,7 @@ namespace ViewModels
 
 
         // Returns the name of the property to which the score should be registered
-        public override PropertyInfo SelectScore(List<(string property, int value)> suggestions, int[] Results, VMScoreboard Scoreboard, int diceCount)
+        public override PropertyInfo? SelectScore(List<(string property, int value)> suggestions, int[] Results, VMScoreboard Scoreboard, int diceCount)
         {
             PropertyInfo PropertyInfo(string property)
             {
@@ -732,7 +732,7 @@ namespace ViewModels
                 return Scoreboard.BonusStatus + BonusDiff(i) >= 0;
             }
 
-            // Find the best score that does not jepodize the bonus
+            // Find the best score that does not jepadize the bonus
             int SomeScoreCandidate = -1;
             for (int i = 0; i < suggestions.Count; i++)
             {
@@ -879,8 +879,8 @@ namespace ViewModels
                 missingDices[i].CombinedScore = missingDices[i].Score * p;
             }
 
-            // Now we have to look for something more difficult
-            // Find the choice with the smallest number of missing dices
+            // Now we try to determine at which result we should try to aim
+            // Find the choice with the highest combined score
             DiceCandidate? AimCandidate = null;
             foreach (DiceCandidate diceCandidate in missingDices)
             {

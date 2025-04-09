@@ -17,7 +17,7 @@ namespace ViewModels
         {
             return null;
         }
-        public override PropertyInfo SelectScore(List<(string property, int value)> suggestions, int[] Results, VMScoreboard Scoreboard, int diceCount)
+        public override PropertyInfo? SelectScore(List<(string property, int value)> suggestions, int[] Results, VMScoreboard Scoreboard, int diceCount)
         {
             return null;
         }

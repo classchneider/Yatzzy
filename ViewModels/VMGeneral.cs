@@ -8,8 +8,15 @@ using static System.Formats.Asn1.AsnWriter;
 
 namespace ViewModels
 {
+    class RollbackData
+    {
+        public PropertyInfo PropInfo;
+        public object Source;
+        public int Score;
+    }
     public class VMYatzyGeneral : INotifyPropertyChanged
     {
+        Stack<RollbackData> Rollbacks = new Stack<RollbackData>();
         public VMYatzyGeneral()
         {
             LoadPlayers();
@@ -18,7 +25,7 @@ namespace ViewModels
             _VMGames = new ReadOnlyObservableCollection<VMGame>(games);
         }
 
-        public enum GameStates { SetupGame, RunGame, Rolling, AfterRoll, SelectScore, NewTurn, EndGame };
+        public enum GameStates { SetupGame, RunGame, Rolling, AfterRoll, SelectScore, NewTurn, EndGame, Rollback };
 
         GameStates gameState;
         public GameStates GameState
@@ -253,6 +260,18 @@ namespace ViewModels
             return game;
         }
 
+        private void PreviousPlayer()
+        {
+            if (CurrentGame != null)
+            {
+                CurrentGame.NextPlayerScoreIndex = (CurrentGame.NextPlayerScoreIndex + CurrentGame.PlayerScores.Count - 1) % CurrentGame.PlayerScores.Count;
+                Model.SaveChanges();
+                RaisePropertyChanged(nameof(CurrentPlayer));
+                RaisePropertyChanged(nameof(CurrentPlayerScore));
+            }
+
+        }
+
         private void NextPlayer()
         {
             if (CurrentGame != null)
@@ -413,6 +432,46 @@ namespace ViewModels
             SelectScore(propInfo, scores, CurrentPlayerScore.VMScoreboard, propInfo.Name, true);
         }
 
+        private void DoSelect(PropertyInfo propInfo, object source, int score)
+        {
+            propInfo.SetValue(source, score, null);
+
+            RollbackData rdata = new()
+            {
+                PropInfo = propInfo,
+                Score = score,
+                Source = source,
+            };
+            Rollbacks.Push(rdata);
+
+            Model.SaveChanges();
+
+        }
+
+        public void Debug_RollBack()
+        {
+            PreviousPlayer();
+
+            RollbackData rdata = Rollbacks.Pop();
+            rdata.PropInfo.SetValue(rdata.Source, null, null);
+            Model.SaveChanges();
+
+            // Notify property change
+            (rdata.Source as VMScoreboard)?.RaisePropertyChanged(rdata.PropInfo.Name);
+            (rdata.Source as VMScoreboard)?.RaisePropertyChanged(nameof(VMScoreboard.Sum));
+            (rdata.Source as VMScoreboard)?.RaisePropertyChanged(nameof(VMScoreboard.Bonus));
+            (rdata.Source as VMScoreboard)?.RaisePropertyChanged(nameof(VMScoreboard.SumEvalueate));
+            (rdata.Source as VMScoreboard)?.RaisePropertyChanged(nameof(VMScoreboard.Sum2));
+
+            // Now change state
+            StateChange(GameStates.Rollback);
+        }
+
+        public void Debug_AfterRoll()
+        {
+            StateChange(GameStates.AfterRoll);
+        }
+
         private async void SelectScore(PropertyInfo propInfo, int[] scores, object source, string columnName, bool silent = false)
         {
             int[] sortedScores = PlayerScore.CountScores(scores);
@@ -422,8 +481,7 @@ namespace ViewModels
             RaiseValueChanged(propInfo.Name);
             if (silent || UIConfirm == null || UIConfirm($"Gem {score} points i {columnName}?"))
             {
-                propInfo.SetValue(source, score, null);
-                Model.SaveChanges();
+                DoSelect(propInfo, source, score);
 
                 // Notify property change
                 (source as VMScoreboard)?.RaisePropertyChanged(propInfo.Name);

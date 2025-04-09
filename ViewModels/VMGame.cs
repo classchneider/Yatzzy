@@ -58,6 +58,10 @@ namespace ViewModels
             }
         }
 
+        delegate int MyFunc();
+        Action<int> test;
+        //Func<int, void> testFunc;
+
         public VMGame CloneEmpty()
         {
             Game newGame = new Game()

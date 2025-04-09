@@ -17,12 +17,12 @@ namespace YatzyRepository
 
     public class DiceCandidate : IComparable
     {
-        public string Property;
-        public int Missing;
-        public int Needed;
-        public int Score;
-        public double CombinedScore;
-        public int HoldDice;
+        public string Property { get; set; }
+        public int Missing { get; set; }
+        public int Needed { get; set; }
+        public int Score { get; set; }
+        public double CombinedScore { get; set; }
+        public int HoldDice { get; set; }
 
         public int CompareTo(object? obj)
         {

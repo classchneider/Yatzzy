@@ -116,6 +116,11 @@ namespace Yatzy.UserControls
             tb_RollCount.Text = RollCount.ToString();
         }
 
+        public void Rollback()
+        {
+            RollCount = 3;
+        }
+
         private async void Roll()
         {
             EnableButtons(false);

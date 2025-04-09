@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using YatzyRepository;
-using YatzyRepository.Migrations;
+//using YatzyRepository.Migrations;
 
 namespace ViewModels
 {
@@ -21,7 +21,7 @@ namespace ViewModels
             this.Player = player;
         }
 
-        public abstract PropertyInfo SelectScore(List<(string property, int value)> suggestions, int[] Results, VMScoreboard Scoreboard, int diceCount);
+        public abstract PropertyInfo? SelectScore(List<(string property, int value)> suggestions, int[] Results, VMScoreboard Scoreboard, int diceCount);
 
         public abstract HoldInfo[]? Holds(int[] Results, VMScoreboard Scoreboard, int diceCount);
 

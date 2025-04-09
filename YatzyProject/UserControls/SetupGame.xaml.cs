@@ -35,6 +35,12 @@ namespace Yatzy.UserControls
             tb_Name.Text = "";
         }
 
+        private void btn_AddAIPlayer_Click(object sender, RoutedEventArgs e)
+        {
+            viewModel.CreateAIRollPlayer(tb_Name.Text);
+            tb_Name.Text = "";
+        }
+
         private void btn_Play_Click(object sender, RoutedEventArgs e)
         {
             AutomatedSelectionUpdate ++;

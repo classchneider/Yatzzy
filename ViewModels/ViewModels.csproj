@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="runtime.win-x64.Microsoft.NETCore.App" Version="2.2.8" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\YatzyRepository\YatzyRepository.csproj" />
   </ItemGroup>
 

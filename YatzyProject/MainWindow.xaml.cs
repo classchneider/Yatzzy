@@ -130,6 +130,10 @@ namespace Yatzy
                     case GameStates.SelectScore:
                         SelectScore(scoreboard.SelectedCellName);
                         break;
+                    case GameStates.Rollback:
+                        turnPlay.Rollback();
+                        scoreboard.ResetSuggestions();
+                        break;
                     case GameStates.Rolling:
                         scoreboard.ResetSuggestions();
                         break;
@@ -179,9 +183,14 @@ namespace Yatzy
             AskPlayerAction();
         }
 
-        private void Menu_Select_Click(object sender, RoutedEventArgs e)
+        private void Menu_RollbackSelection_Click(object sender, RoutedEventArgs e)
         {
-            ViewModel.CurrentPlayerScore.SelectScore(ViewModel.GenerateSuggestions(turnPlay.Results), turnPlay.Results, turnPlay.RollCount);
+            ViewModel.Debug_RollBack();
+        }
+
+        private void Menu_After_Turn_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.Debug_AfterRoll();
         }
     }
 }

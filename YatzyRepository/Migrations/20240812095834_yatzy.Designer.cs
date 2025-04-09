@@ -12,8 +12,8 @@ using YatzyRepository;
 namespace YatzyRepository.Migrations
 {
     [DbContext(typeof(YatzyModel))]
-    [Migration("20230102212129_Game4")]
-    partial class Game4
+    [Migration("20240812095834_yatzy")]
+    partial class yatzy
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -35,9 +35,6 @@ namespace YatzyRepository.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("GameEnded")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -58,6 +55,10 @@ namespace YatzyRepository.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -65,6 +66,8 @@ namespace YatzyRepository.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Players");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Player");
                 });
 
             modelBuilder.Entity("YatzyRepository.PlayerScore", b =>
@@ -151,6 +154,20 @@ namespace YatzyRepository.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Scoreboards");
+                });
+
+            modelBuilder.Entity("YatzyRepository.AIRollPlayer", b =>
+                {
+                    b.HasBaseType("YatzyRepository.Player");
+
+                    b.HasDiscriminator().HasValue("AIRollPlayer");
+                });
+
+            modelBuilder.Entity("YatzyRepository.HumanPlayer", b =>
+                {
+                    b.HasBaseType("YatzyRepository.Player");
+
+                    b.HasDiscriminator().HasValue("HumanPlayer");
                 });
 
             modelBuilder.Entity("YatzyRepository.PlayerScore", b =>

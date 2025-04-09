@@ -24,9 +24,10 @@
                 <MenuItem Header="_Debug">
                     <MenuItem Header="Suggestions" Name="Menu_Suggestions" Click="Menu_Suggestions_Click"/>
                     <MenuItem Header="Bot Holds" Name="Menu_Holds" Click="Menu_Holds_Click"/>
-                    <MenuItem Header="Bot SelectScore" Name="Menu_Select" Click="Menu_Select_Click"/>
+                    <MenuItem Header="Rollback Selection" Name="Menu_RollbackSelection" Click="Menu_RollbackSelection_Click"/>
+                    <MenuItem Header="After_Turn" Name="Menu_After_Turn" Click="Menu_After_Turn_Click"/>
 
-               </MenuItem>
+                </MenuItem>
             </Menu>
         </DockPanel>
         <Grid Grid.Row="1" x:Name="GameGrid" Background="White">
